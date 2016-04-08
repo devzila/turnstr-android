@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Built application files
 /*/build/
 build/
@@ -26,3 +27,7 @@ local.properties
 .Trashes
 ehthumbs.db
 Thumbs.db
+=======
+/picasso-library
+/view_pager_3drotation
+>>>>>>> 46b0039da9e58986026816bfc9d85e9132c6a6a2
