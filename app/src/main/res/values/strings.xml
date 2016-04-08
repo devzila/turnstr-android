@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Turnstr</string>
+    <string name="title_activity_login__screen">Login_Screen</string>
+    <string name="username">username</string>
+    <string name="password">password</string>
+    <string name="title_activity_signup_screen">Signup_screen</string>
+
+</resources>

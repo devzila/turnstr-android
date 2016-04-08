@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<color name="tabMedium">#474747</color>
+	<color name="tabDark">#474747</color>
+	<color name="tabTransparent">#10ffffff</color>
+	<color name="Loginbg">#FA8723</color>
+	<color name="tabBrown">#794314</color>
+	<color name="tabWhite">#FFFFFF</color>
+</resources>
