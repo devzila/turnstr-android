@@ -1,45 +1,38 @@
 package com.ToxicBakery.viewpager.transforms.example;
 
-import android.app.ActionBar;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Parcelable;
+import android.preference.PreferenceManager;
 import android.provider.Settings;
-import android.provider.SyncStateContract;
 import android.support.v13.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
+
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.widget.AdapterView;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.ToxicBakery.viewpager.transforms.CubeOutTransformer;
 import com.squareup.picasso.Picasso;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicHeader;
-import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -49,17 +42,15 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
-import Service_Handler.Constants;
-import Service_Handler.ServiceHandler;
+import Service_Handler.Constant;
 import adapter.SampleAdapter;
 import circular_imagview.CircularImageView;
 import circular_imagview.ProgressHUD;
 
 
 public class HomeActivity extends Activity {
-    ListView Lv;
+
     SampleAdapter adapter;
     private PageAdapter mAdapter;
     private ViewPager mPager;
@@ -71,6 +62,9 @@ public class HomeActivity extends Activity {
     CircularImageView CrclImgv;
     ArrayList<HashMap<String, String>> data = new ArrayList<HashMap<String, String>>();
     ArrayList<String> Array_img = new ArrayList<String>();
+    ArrayList<String> Array_single_image = new ArrayList<String>();
+    ProgressDialog pDialog;
+    Parcelable state;
 
     static {
         TRANSFORM_CLASSES = new ArrayList<>();
@@ -92,14 +86,15 @@ public class HomeActivity extends Activity {
         String Name = intent.getStringExtra("Name");
         acess_token = intent.getStringExtra("Acess_Token");
         device_id = intent.getStringExtra("device_id");
-       // TxtVWName.setText(Name);
-        contexts=this;
+        // TxtVWName.setText(Name);
+        contexts = this;
 //		CrclImgv =(CircularImageView)findViewById(R.id.imageView4);
 //		CrclImgv.setBorderColor(getResources().getColor(R.color.Loginbg));
 //		CrclImgv.setBorderWidth(10);
 
 
-		Lv = (ListView)findViewById(R.id.listView);
+     //   Lv = (RecyclerView) findViewById(R.id.listView);
+
 
 
 //		ArrayList<HashMap<String, String>> data = new ArrayList<HashMap<String, String>>();
@@ -123,6 +118,12 @@ public class HomeActivity extends Activity {
 //        mAdapter = new PageAdapter(getFragmentManager());
 //
 //        mPager.setAdapter(mAdapter);
+//        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(HomeActivity.this);
+//        boolean hasPassword = sharedPrefs.contains("list");
+//        if(hasPassword==true){
+//
+//            String arr = sharedPrefs.getString("list",null);
+//        }
         new Login().execute();
 
 
@@ -132,7 +133,7 @@ public class HomeActivity extends Activity {
     public static class PlaceholderFragment extends Fragment {
 
         private static final String EXTRA_POSITION = "EXTRA_POSITION";
-        private static final int[] COLORS = new int[]{R.drawable.imgone, R.drawable.imgtwo, R.drawable.imgthree, R.drawable.imgfour};
+       // private static final int[] COLORS = new int[]{R.drawable.imgone, R.drawable.imgtwo, R.drawable.imgthree, R.drawable.imgfour};
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -200,8 +201,11 @@ public class HomeActivity extends Activity {
         protected void onPreExecute() {
             super.onPreExecute();
 
-            mProgressHUD = ProgressHUD.show(HomeActivity.this, "Connecting", true, true, this);
-
+            //   mProgressHUD = ProgressHUD.show(HomeActivity.this, "Connecting", true, true, this);
+            pDialog = new ProgressDialog(HomeActivity.this);
+            pDialog.setMessage("Please wait...");
+            pDialog.setCancelable(false);
+            pDialog.show();
             android_id = Settings.Secure.getString(HomeActivity.this.getContentResolver(),
                     Settings.Secure.ANDROID_ID);
             myVersion = android.os.Build.VERSION.RELEASE;
@@ -215,7 +219,7 @@ public class HomeActivity extends Activity {
             // Creating service handler class instance
             publishProgress("Please wait...");
 
-            String Response = makeServiceCall(Constants.Fetch_posts);
+            String Response = makeServiceCall(Constant.Fetch_posts);
             if (Response != null) {
                 try {
                     JSONObject jsonObj = null;
@@ -266,7 +270,9 @@ public class HomeActivity extends Activity {
                             Info.put("created_at", created_at);
                             Info.put("updated_at", updated_at);
                             data.add(Info);
-                            Array_img.add(media1_url+","+media2_url+","+media3_url+","+media4_url);
+                            Array_img.add(media1_url + "," + media2_url + "," + media3_url + "," + media4_url);
+                            Array_single_image.add(media1_url);
+
 
 //						String userid = jsonnode.getString("user_id");
 //						Name = json_User.getString("name");
@@ -290,11 +296,23 @@ public class HomeActivity extends Activity {
         protected void onPostExecute(Void result) {
             super.onPostExecute(result);
             // Dismiss the progress dialog
-            mProgressHUD.dismiss();
+            pDialog.dismiss();
             adapter = new SampleAdapter(HomeActivity.this,
-				android.R.layout.simple_list_item_1, data,Array_img,
-				getApplication());
-		Lv.setAdapter(adapter);
+                    android.R.layout.simple_list_item_1, data, Array_img,Array_single_image,
+                    getApplication());
+            //Lv.setAdapter(adapter);
+
+           // Lv.onRestoreInstanceState(state);
+            SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(HomeActivity.this);
+            SharedPreferences.Editor editor = sharedPrefs.edit();
+
+
+            JSONArray araay= new JSONArray(data);
+            JSONArray araay2= new JSONArray(Array_img);
+
+            editor.putString("list", araay.toString());
+            editor.putString("list2", araay2.toString());
+            editor.commit();
 
         }
 
@@ -342,4 +360,5 @@ public class HomeActivity extends Activity {
         return response;
 
     }
+
 }

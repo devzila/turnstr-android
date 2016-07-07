@@ -1,38 +1,58 @@
-<?xml version="1.0" encoding="utf-8"?><!--
-  ~ Copyright 2014 Toxic Bakery
-  ~
-  ~ Licensed under the Apache License, Version 2.0 (the "License");
-  ~ you may not use this file except in compliance with the License.
-  ~ You may obtain a copy of the License at
-  ~
-  ~       http://www.apache.org/licenses/LICENSE-2.0
-  ~
-  ~ Unless required by applicable law or agreed to in writing, software
-  ~ distributed under the License is distributed on an "AS IS" BASIS,
-  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  ~ See the License for the specific language governing permissions and
-  ~ limitations under the License.
--->
+<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.ToxicBakery.viewpager.transforms.example"
     android:versionCode="1"
     android:versionName="1.0">
 
     <uses-sdk
-        android:minSdkVersion="13"
-        android:targetSdkVersion="19" />
+        android:minSdkVersion="15"
+        android:targetSdkVersion="23" />
 
     <uses-permission android:name="android.hardware.CAMERA" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO"></uses-permission>
 
-    <android:uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-feature android:name="android.hardware.camera.autofocus" />
+
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+
+    <service
+        android:name="com.aviary.android.feather.cds.AviaryCdsService"
+        android:exported="false"
+        android:process=":aviarycds">
+        <intent-filter>
+            <action android:name="aviary.intent.action.CDS_DOWNLOAD_START" />
+            <action android:name="aviary.intent.action.CDS_RESTORE_USER_ITEMS" />
+        </intent-filter>
+    </service>
+
+    <!--
+        Cds Content Provider,
+        NOTE that the "authorities" value MUST be formatted in this way:
+        android:authorities="{your.packagename}.AviaryCdsProvider"
+    -->
+
+
+    <!-- CDS Download Receiver -->
+    <receiver
+        android:name="com.aviary.android.feather.cds.AviaryCdsReceiver"
+        android:process=":aviarycds">
+        <intent-filter>
+            <action android:name="android.intent.action.DOWNLOAD_COMPLETE" />
+        </intent-filter>
+    </receiver>
 
     <application
         android:allowBackup="true"
         android:icon="@drawable/turnsterappicon"
         android:label="@string/app_name"
+        android:largeHeap="true"
+        android:exported="true"
         android:theme="@style/AppBaseTheme">
         <activity
             android:name=".Splash_Screen"
@@ -74,7 +94,64 @@
         <activity
             android:name=".ListActivity"
             android:screenOrientation="portrait" />
-        <activity android:name=".Images_comment_screen"></activity>
+        <activity android:name=".Images_comment_screen" />
+        <activity
+            android:name="dgcam.DgCamActivity"
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
+            />
+        <activity android:name=".Forgot_password" />
+        <activity android:name=".Explorer_Screen" />
+        <activity
+            android:name=".Camera_activity"
+            android:screenOrientation="portrait" />
+        <activity android:name=".Edit_profile" />
+        <activity android:name=".Full_view" />
+        <activity
+            android:name="com.facebook.FacebookActivity"
+            android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation"
+            android:label="@string/app_name"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+
+        <meta-data
+            android:name="com.facebook.sdk.ApplicationId"
+            android:value="@string/facebook_app_id" />
+
+        <activity android:name=".Local_image_3dcube" />
+        <activity
+            android:name="com.aviary.android.feather.sdk.FeatherActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:hardwareAccelerated="true"
+            android:largeHeap="true"
+            android:process=":aviarysdk"
+            android:screenOrientation="unspecified"
+            android:theme="@style/AviaryTheme.Dark" />
+
+        <meta-data
+            android:name="com.aviary.android.feather.v1.API_KEY"
+            android:value="889d9116-68e9-4ba0-8c54-9bc888c8d90a" />
+        <!-- CDS Content Service -->
+        <provider
+            android:name="com.aviary.android.feather.cds.AviaryCdsProvider"
+            android:authorities="${applicationId}.AviaryCdsProvider"
+            android:exported="false"
+            android:process=":aviarycds"
+            android:syncable="true" />
+        <provider
+            android:name="com.facebook.FacebookContentProvider"
+            android:authorities="com.facebook.app.FacebookContentProvider${applicationId}"
+            android:exported="true" />
+
+        <activity
+            android:name=".Other_user_profile"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/title_activity_other_user_profile"
+            android:theme="@style/FullscreenTheme" />
+        <activity
+            android:name=".Hashtag_Search_Activity"
+            android:label="@string/title_activity_hashtag__search_" />
+        <activity android:name=".Follower_following_screen"></activity>
+
+
     </application>
 
 </manifest>

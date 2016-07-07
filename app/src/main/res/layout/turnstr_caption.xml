@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/aviary_nav_primary_color_transparent">
+    <RelativeLayout
+        android:id="@+id/rlvpopupup"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="30dp"
+        android:layout_marginRight="30dp"
+        android:layout_marginTop="90dp"
+        android:background="@android:drawable/editbox_background"
+        android:visibility="visible"
+        android:layout_marginBottom="50dp">
+
+        <RelativeLayout
+            android:id="@+id/relativeLayoutpopup"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:visibility="visible">
+
+            <TextView
+                android:id="@+id/textView399"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="5dp"
+                android:text="NEXT"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textColor="@color/com_facebook_device_auth_text" />
+
+            <ImageView
+                android:id="@+id/img_crosss"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="5dp"
+                android:src="@drawable/back" />
+
+            <Button
+                android:id="@+id/Buttn_uploadd"
+                android:layout_width="50dp"
+                android:layout_height="match_parent"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:background="@android:color/transparent" />
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:background="@color/aviary_adjust_fill_color"></RelativeLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:text="Share to"
+                android:id="@+id/textView47"
+                android:layout_alignTop="@+id/img_crosss"
+                android:layout_centerHorizontal="true"
+                android:textColor="@color/com_facebook_device_auth_text" />
+
+            <Button
+                android:id="@+id/button6"
+                android:layout_width="50dp"
+                android:layout_height="match_parent"
+                android:background="@android:color/transparent"
+                android:layout_alignParentTop="true"
+                android:layout_alignLeft="@+id/img_crosss"
+                android:layout_alignStart="@+id/img_crosss" />
+
+        </RelativeLayout>
+
+        <ImageView
+            android:layout_width="120dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/Facebook_share"
+            android:src="@drawable/facebook_share"
+            android:layout_marginTop="42dp"
+            android:layout_below="@+id/relativeLayoutpopup"
+            android:layout_toLeftOf="@+id/relativeLayout30"
+            android:layout_toStartOf="@+id/relativeLayout30"
+            android:layout_marginRight="10dp" />
+
+        <ImageView
+            android:layout_width="120dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/Twitter_share"
+            android:src="@drawable/twitter_share"
+            android:layout_alignTop="@+id/Facebook_share"
+            android:layout_alignLeft="@+id/relativeLayout30"
+            android:layout_alignStart="@+id/relativeLayout30"
+            android:layout_marginLeft="10dp" />
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignBottom="@+id/Facebook_share"
+            android:layout_centerHorizontal="true"
+            android:id="@+id/relativeLayout30"
+            android:layout_below="@+id/relativeLayoutpopup">
+
+        </RelativeLayout>
+
+        <ImageView
+            android:layout_width="120dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/imageView33"
+            android:layout_below="@+id/Facebook_share"
+            android:layout_alignLeft="@+id/Facebook_share"
+            android:layout_alignStart="@+id/Facebook_share"
+            android:src="@drawable/tumbler_share"
+            android:layout_marginTop="10dp" />
+
+        <ImageView
+            android:layout_width="120dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/imageView43"
+            android:layout_alignTop="@+id/imageView33"
+            android:layout_alignLeft="@+id/Twitter_share"
+            android:layout_alignStart="@+id/Twitter_share"
+            android:src="@drawable/flickr_share" />
+
+        <ImageView
+            android:layout_width="120dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/imageView44"
+            android:layout_below="@+id/imageView33"
+            android:layout_alignLeft="@+id/imageView33"
+            android:layout_alignStart="@+id/imageView33"
+            android:src="@drawable/email_share"
+            android:layout_marginTop="10dp" />
+
+
+    </RelativeLayout>
+</RelativeLayout>

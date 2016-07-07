@@ -71,7 +71,12 @@ public class ServiceHandler {
 
             }
             httpEntity = httpResponse.getEntity();
-            response = EntityUtils.toString(httpEntity);
+            try {
+                response = EntityUtils.toString(httpEntity);
+            }catch (java.lang.OutOfMemoryError e){
+                e.printStackTrace();
+            }
+
  
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
@@ -83,5 +88,53 @@ public class ServiceHandler {
          
         return response;
  
+    }
+
+    public String makeServiceCall_withHeader(String url, int method,
+                                  List<NameValuePair> params,String accestoken,String device_id ) {
+        try {
+            // http client
+            DefaultHttpClient httpClient = new DefaultHttpClient();
+            HttpEntity httpEntity = null;
+            HttpResponse httpResponse = null;
+
+            // Checking http request method type
+            if (method == POST) {
+                HttpPost httpPost = new HttpPost(url);
+                httpPost.addHeader("X-TOKEN", accestoken);
+                httpPost.addHeader("X-DEVICE", device_id);
+                // adding post params
+                if (params != null) {
+                    httpPost.setEntity(new UrlEncodedFormEntity(params));
+                }
+
+                httpResponse = httpClient.execute(httpPost);
+
+            } else if (method == GET) {
+                // appending params to url
+                if (params != null) {
+                    String paramString = URLEncodedUtils
+                            .format(params, "utf-8");
+                    url += "?" + paramString;
+                }
+                HttpGet httpGet = new HttpGet(url);
+                httpGet.addHeader("X-TOKEN", accestoken);
+                httpGet.addHeader("X-DEVICE", device_id);
+                httpResponse = httpClient.execute(httpGet);
+
+            }
+            httpEntity = httpResponse.getEntity();
+            response = EntityUtils.toString(httpEntity);
+
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (ClientProtocolException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return response;
+
     }
 }
