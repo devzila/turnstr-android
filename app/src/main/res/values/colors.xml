@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-	<color name="tabMedium">#474747</color>
-	<color name="tabDark">#474747</color>
-	<color name="tabTransparent">#10ffffff</color>
-	<color name="Loginbg">#FA8723</color>
-	<color name="tabBrown">#794314</color>
-	<color name="tabWhite">#FFFFFF</color>
+    <color name="tabMedium">#474747</color>
+    <color name="tabDark">#0d0000</color>
+    <color name="tabTransparent">#10ffffff</color>
+    <color name="Loginbg">#fa8723</color>
+    <color name="tabBrown">#794314</color>
+    <color name="tabWhite">#ffffff</color>
+
+    <color name="black_overlay">#66000000</color>
 </resources>

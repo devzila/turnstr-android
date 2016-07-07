@@ -12,7 +12,7 @@
         android:id="@+id/relativeLayout3"
         android:layout_marginTop="50dp">
         <android.support.v4.view.ViewPager
-            android:id="@+id/container"
+            android:id="@+id/containerr"
             android:layout_width="match_parent"
             android:layout_height="250dp"
 

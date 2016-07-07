@@ -58,7 +58,7 @@
             android:layout_alignParentTop="true"
             android:layout_centerHorizontal="true"
 
-            android:layout_marginTop="80dp"
+            android:layout_marginTop="50dp"
             android:src="@drawable/logologin" />
 
         <LinearLayout
@@ -141,7 +141,7 @@
             android:layout_below="@+id/imageView"
             android:layout_centerHorizontal="true"
             android:background="#E5681A"
-            android:layout_marginTop="77dp">
+            android:layout_marginTop="40dp">
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -179,6 +179,8 @@
                     android:layout_centerHorizontal="true"
                     android:textColor="#ffffff"
                     android:textStyle="bold" />
+
+
 
             </RelativeLayout>
 

@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#1D1D1D">
+
+    <view_pager.viewpager
+
+        android:id="@+id/containerr"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_centerVertical="true" />
+
+    <RelativeLayout
+        android:id="@+id/relativeLayout22"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:background="@color/tabMedium">
+
+        <TextView
+            android:id="@+id/textView39"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="5dp"
+            android:text="NEXT"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textColor="@color/tabWhite" />
+
+        <ImageView
+            android:id="@+id/img_cross"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="5dp"
+            android:src="@drawable/closeicon" />
+
+        <Button
+            android:id="@+id/Buttn_upload"
+            android:layout_width="50dp"
+            android:layout_height="match_parent"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:background="@android:color/transparent" />
+    </RelativeLayout>
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="2dp"
+
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/relativeLayout22"
+        android:indeterminate="false"
+        android:progressDrawable="@drawable/progress_drawable"
+        android:visibility="visible" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/containerr"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="15dp">
+
+        <TextView
+            android:id="@+id/textView38"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="25dp"
+            android:layout_toLeftOf="@+id/relativeLayout29"
+            android:layout_toStartOf="@+id/relativeLayout29"
+            android:text=""
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textColor="@color/tabWhite" />
+
+        <ImageView
+            android:id="@+id/img_filter"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_alignParentTop="true" />
+
+        <RelativeLayout
+            android:id="@+id/relativeLayout29"
+            android:layout_width="5dp"
+            android:layout_height="5dp"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"></RelativeLayout>
+
+        <Button
+            android:id="@+id/Btn_filter"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_marginRight="25dp"
+            android:layout_toLeftOf="@+id/relativeLayout29"
+            android:layout_toStartOf="@+id/relativeLayout29"
+            android:text="Add filter" />
+
+        <Button
+            android:id="@+id/Btn_skip"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="25dp"
+
+            android:layout_toEndOf="@+id/relativeLayout29"
+            android:layout_toRightOf="@+id/relativeLayout29"
+            android:text="Skip" />
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/rlv_big_popup"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/relativeLayout22"
+        android:layout_centerHorizontal="true"
+        android:background="#88676767"
+        android:visibility="gone">
+
+        <RelativeLayout
+            android:id="@+id/rlvpopupup"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="90dp"
+            android:layout_marginLeft="50dp"
+            android:layout_marginRight="50dp"
+            android:layout_marginTop="20dp"
+            android:background="@android:drawable/editbox_background"
+            android:visibility="visible">
+
+            <view_pager.viewpager
+
+                android:id="@+id/container"
+                android:layout_width="match_parent"
+                android:layout_height="300dp"
+
+
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_below="@+id/relativeLayoutpopup"
+                android:visibility="visible" />
+
+            <RelativeLayout
+                android:id="@+id/relativeLayoutpopup"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                android:visibility="visible">
+
+                <TextView
+                    android:id="@+id/textView399"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginRight="5dp"
+                    android:text="NEXT"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textColor="@color/com_facebook_device_auth_text" />
+
+                <ImageView
+                    android:id="@+id/img_crosss"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="5dp"
+                    android:src="@drawable/back" />
+
+                <Button
+                    android:id="@+id/Buttn_uploadd"
+                    android:layout_width="50dp"
+                    android:layout_height="match_parent"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:background="@android:color/transparent" />
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_alignParentBottom="true"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:background="@color/aviary_adjust_fill_color"></RelativeLayout>
+            </RelativeLayout>
+
+
+            <EditText
+                android:id="@+id/EdtTxt_caption"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:layout_below="@+id/container"
+                android:gravity="top|left"
+                android:hint="Add caption"
+                android:visibility="visible"
+                android:layout_marginTop="10dp"
+                android:background="@color/aviary_adjust_internal_stroke_color" />
+
+
+        </RelativeLayout>
+    </RelativeLayout>
+
+</RelativeLayout>

@@ -6,5 +6,14 @@
     <string name="username">username</string>
     <string name="password">password</string>
     <string name="title_activity_signup_screen">Signup_screen</string>
+    <string name="facebook_app_id">315531628630760</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string name="title_activity_other_user_profile">Other_user_profile</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="title_activity_hashtag__search_">Hashtag_Search_Activity</string>
 
 </resources>

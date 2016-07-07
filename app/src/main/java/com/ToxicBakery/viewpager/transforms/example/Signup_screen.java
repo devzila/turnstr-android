@@ -30,8 +30,9 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import Service_Handler.Constants;
+import Service_Handler.Constant;
 import Service_Handler.ServiceHandler;
+import Session_handler.Session_manager;
 import circular_imagview.ProgressHUD;
 
 public class Signup_screen extends Activity {
@@ -40,8 +41,11 @@ public class Signup_screen extends Activity {
     Button Sign_up;
     Boolean email_matcher;
     ProgressHUD mProgressHUD;
-    String First_name,StrEmail,Str_username,Str_password,Str_Confirmpassword;
+    String First_name, StrEmail, Str_username, Str_password, Str_Confirmpassword;
     TextView alreadyRegister;
+    String Str_response;
+    Session_manager session;
+    String userid;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,9 +61,9 @@ public class Signup_screen extends Activity {
         LvUsername = (LinearLayout) findViewById(R.id.linearLayout4);
         Lv_password = (LinearLayout) findViewById(R.id.linearLayout5);
         LvConfirmpassword = (LinearLayout) findViewById(R.id.linearLayout6);
-        alreadyRegister = (TextView)findViewById(R.id.textView5);
+        alreadyRegister = (TextView) findViewById(R.id.textView5);
         Sign_up = (Button) findViewById(R.id.button);
-
+        session = new Session_manager(getApplicationContext());
         Sign_up.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -69,12 +73,11 @@ public class Signup_screen extends Activity {
                 } else if (Email.getText().toString().contentEquals("")) {
                     Animation anm = Shake_Animation();
                     Lv_Email.startAnimation(anm);
-                }else if (emailValidator(Email.getText().toString())==false) {
+                } else if (emailValidator(Email.getText().toString()) == false) {
                     Animation anm = Shake_Animation();
                     Lv_Email.startAnimation(anm);
                     Toast.makeText(Signup_screen.this, "Email address not valid", Toast.LENGTH_LONG).show();
-                }
-                else if (Usrname.getText().toString().contentEquals("")) {
+                } else if (Usrname.getText().toString().contentEquals("")) {
                     Animation anm = Shake_Animation();
                     LvUsername.startAnimation(anm);
                 } else if (Password.getText().toString().contentEquals("")) {
@@ -94,10 +97,10 @@ public class Signup_screen extends Activity {
 //                    startActivity(i1);
 //
 //                    finish();
-                    First_name=Edtxt_fistname.getText().toString();
-                    StrEmail=Email.getText().toString();
-                    Str_username=Usrname.getText().toString();
-                    Str_Confirmpassword=Confirmpassword.getText().toString();
+                    First_name = Edtxt_fistname.getText().toString();
+                    StrEmail = Email.getText().toString();
+                    Str_username = Usrname.getText().toString();
+                    Str_Confirmpassword = Confirmpassword.getText().toString();
 
                     new sign_up().execute();
 
@@ -139,10 +142,10 @@ public class Signup_screen extends Activity {
 
     private class sign_up extends AsyncTask<Void, String, Void> implements DialogInterface.OnCancelListener {
         String android_id;
-        String myVersion,Hardware;
+        String myVersion, Hardware;
         JSONObject jsonnode;
         String str;
-        String Deviceid,Token;
+        String Deviceid, Token;
 
         @Override
         protected void onPreExecute() {
@@ -157,7 +160,7 @@ public class Signup_screen extends Activity {
             android_id = Settings.Secure.getString(Signup_screen.this.getContentResolver(),
                     Settings.Secure.ANDROID_ID);
             myVersion = android.os.Build.VERSION.RELEASE;
-            Hardware= Build.MANUFACTURER;
+            Hardware = Build.MANUFACTURER;
         }
 
         @Override
@@ -168,8 +171,8 @@ public class Signup_screen extends Activity {
             ServiceHandler sh = new ServiceHandler();
             List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(7);
             nameValuePairs.add(new BasicNameValuePair("name", First_name));
-            nameValuePairs.add(new BasicNameValuePair("phone_number", "9914564058"));
-            nameValuePairs.add(new BasicNameValuePair("email",StrEmail));
+            nameValuePairs.add(new BasicNameValuePair("phone_number", "9914964058"));
+            nameValuePairs.add(new BasicNameValuePair("email", StrEmail));
             nameValuePairs.add(new BasicNameValuePair("username", Str_username));
             nameValuePairs.add(new BasicNameValuePair("password", Str_Confirmpassword));
             nameValuePairs.add(new BasicNameValuePair("hardware", Hardware));
@@ -178,10 +181,10 @@ public class Signup_screen extends Activity {
             nameValuePairs.add(new BasicNameValuePair("os_version", myVersion));
             nameValuePairs.add(new BasicNameValuePair("app_version", "1"));
             // Making a request to url and getting response
-            String jsonStr = sh.makeServiceCall(Constants.Register,
+            String jsonStr = sh.makeServiceCall(Constant.Register,
                     ServiceHandler.POST, nameValuePairs);
-
-            Log.d("Response: ", "> " + jsonStr);
+            Str_response = jsonStr;
+            //  Log.d("Response: ", "> " + jsonStr);
 
             if (jsonStr != null) {
                 try {
@@ -194,11 +197,13 @@ public class Signup_screen extends Activity {
 
                     // Getting JSON Array node
                     // JSONArray array1 = null;
-                     str = jsonObj.getString("status");
-                    if(str.contentEquals("true")) {
+                    str = jsonObj.getString("status");
+                    if (str.contentEquals("true")) {
                         jsonnode = jsonObj.getJSONObject("data");
-                         Deviceid = jsonnode.getString("device_id");
+                        Deviceid = jsonnode.getString("device_id");
                         Token = jsonnode.getString("access_token");
+                        String Error = jsonnode.getString("errors");
+                        userid = jsonnode.getString("user_id");
                         // looping through All Contacts
                     }
 
@@ -217,18 +222,23 @@ public class Signup_screen extends Activity {
             super.onPostExecute(result);
             // Dismiss the progress dialog
 
+
             mProgressHUD.dismiss();
-            if(str.contentEquals("true")) {
+            if (str.contentEquals("true")) {
+                session.createLoginSession(Token, Deviceid, userid, StrEmail, Str_username, First_name, ""
+                        , "", "", "", "");
                 Intent i1 = new Intent(Signup_screen.this,
                         MainActivity.class);
-                i1.putExtra("Name",First_name);
-                i1.putExtra("access_tocken",Deviceid);
-                i1.putExtra("Ostype",Deviceid);
+                i1.putExtra("Name", First_name);
+                i1.putExtra("access_tocken", Token);
+                i1.putExtra("Ostype", Deviceid);
                 startActivity(i1);
 
                 finish();
-            }else{
-                Toast.makeText(Signup_screen.this,"Not Registered",Toast.LENGTH_LONG).show();
+            } else if (Str_response.contains("email")) {
+                Toast.makeText(Signup_screen.this, "Email id already exist ", Toast.LENGTH_LONG).show();
+            } else if (Str_response.contains("username")) {
+                Toast.makeText(Signup_screen.this, "Username  already exist ", Toast.LENGTH_LONG).show();
             }
 
 

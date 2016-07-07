@@ -6,8 +6,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.Window;
 
-import circular_imagview.ProgressHUD;
-import circular_imagview.ProgressHUDDemo;
+import Session_handler.Session_manager;
 
 public class Splash_Screen extends Activity {
    
@@ -15,7 +14,7 @@ public class Splash_Screen extends Activity {
     protected boolean _active = true;
     private SharedPreferences preferences;
     private Thread splashTread;
-
+    Session_manager session;
     /** The _splash time. */
     protected int _splashTime = 1500;
 
@@ -25,6 +24,7 @@ public class Splash_Screen extends Activity {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_splash__screen);
+        session = new Session_manager(getApplicationContext());
         splashTread = new Thread() {
             @Override
             public void run() {
@@ -41,12 +41,24 @@ public class Splash_Screen extends Activity {
                 } finally {
                     try {
 
-                         Intent i1 = new Intent(Splash_Screen.this,
-                         Login_Screen.class);
+                        boolean check_login = session.isLoggedIn();
+                        if(check_login==true){
+                            Intent i1 = new Intent(Splash_Screen.this,
+                                    MainActivity.class);
 
-                         startActivity(i1);
+                            startActivity(i1);
 
-                        finish();
+                            finish();
+                        }else{
+                            Intent i1 = new Intent(Splash_Screen.this,
+                                    Login_Screen.class);
+
+                            startActivity(i1);
+
+                            finish();
+                        }
+
+
 
                     } catch (Exception e2) {
 

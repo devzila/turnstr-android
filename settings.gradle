@@ -14,4 +14,6 @@
  * limitations under the License.
  */
 
-include ':app', ':library', ':mylibrary', ':picasso-2.0.0', ':picasso-2.5.2'
+include ':app', ':library', ':mylibrary', ':picasso-2.0.0', ':picasso-2.5.2', ':httpmime-4.3.1', ':httpclient-4.5.1', ':android-query-full.0.26.7', ':pinchZoom', ':library_imagviewZoom', ':httpmime-4.3.6', ':httpcore-4.3.3', ':facebook-android-sdk-4.11.0', ':facebook', ':imagecropview', ':library_videoView'
+
+include ':gestureimageviewzoom'
