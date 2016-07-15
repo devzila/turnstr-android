@@ -162,7 +162,21 @@ public class Local_image_3dcube extends Activity {
         Btn_cross.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent i1 = new Intent(Local_image_3dcube.this,DgCamActivity.class);
+                File mediaStorageDir = new File(
+                        Environment
+                                .getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
+                        "Turnstr");
+//                if (mediaStorageDir.isDirectory()) {
+//                    mediaStorageDir.delete();
+//                }
+                deleteRecursive(mediaStorageDir);
+                File dir = new File(Environment.getExternalStorageDirectory()
+                        + "/Turnstrr/");
+                deleteRecursive(dir);
+                String root = Environment.getExternalStorageDirectory().toString();
+                File myDir = new File(root + "/Turnstr_thumbnail");
+                deleteRecursive(myDir);
+                Intent i1 = new Intent(Local_image_3dcube.this, DgCamActivity.class);
                 Local_image_3dcube.this.startActivity(i1);
                 finish();
             }
@@ -282,7 +296,7 @@ public class Local_image_3dcube extends Activity {
         Btn_upload.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Caption = Edttext_caption.getText().toString();
+               // Caption = Edttext_caption.getText().toString();
 //                String[] tools = new String[]{"ENHANCE", "EFFECTS",
 //                        "TILT_SHIFT", "CROP",
 //                        "BRIGHTNESS", "CONTRAST", "SATURATION", "COLORTEMP",
@@ -295,7 +309,8 @@ public class Local_image_3dcube extends Activity {
 //                newIntent.putExtra(Constants.EXTRA_IN_API_KEY_SECRET,
 //                        "889d9116-68e9-4ba0-8c54-9bc888c8d90a");
 //                startActivityForResult(newIntent, 1);
-                new UploadFileToServer().execute();
+             //   new UploadFileToServer().execute();
+                Rlv_popupp.setVisibility(View.VISIBLE);
             }
         });
         Btn_addfilter.setOnClickListener(new View.OnClickListener() {
@@ -317,6 +332,14 @@ public class Local_image_3dcube extends Activity {
             }
         });
 
+    }
+
+    public void deleteRecursive(File fileOrDirectory) {
+        if (fileOrDirectory.isDirectory())
+            for (File child : fileOrDirectory.listFiles())
+                deleteRecursive(child);
+
+        fileOrDirectory.delete();
     }
 
     private static final class TransformerItem {
@@ -492,6 +515,20 @@ public class Local_image_3dcube extends Activity {
                 new File(myUri.getPath()).delete();
 
             }
+            File mediaStorageDir = new File(
+                    Environment
+                            .getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
+                    "Turnstr");
+//                if (mediaStorageDir.isDirectory()) {
+//                    mediaStorageDir.delete();
+//                }
+            deleteRecursive(mediaStorageDir);
+            File dir = new File(Environment.getExternalStorageDirectory()
+                    + "/Turnstrr/");
+            deleteRecursive(dir);
+            String root = Environment.getExternalStorageDirectory().toString();
+            File myDir = new File(root + "/Turnstr_thumbnail");
+            deleteRecursive(myDir);
 //            Intent i1 = new Intent(Local_image_3dcube.this,
 //                    Camera_activity.class);
 //            Toast.makeText(Local_image_3dcube.this, responseString, Toast.LENGTH_LONG).show();
@@ -564,6 +601,7 @@ public class Local_image_3dcube extends Activity {
                     public void onPrepared(final MediaPlayer mp) {
 //                            startVideoPlayback();
 //                            startVideoAnimation();
+                        mp.setVolume(0f, 0f);
                         mp.start();
                         mp.setOnInfoListener(new MediaPlayer.OnInfoListener() {
                             @Override
@@ -603,7 +641,7 @@ public class Local_image_3dcube extends Activity {
 //                    Img_view.setImageBitmap(bmp);
                     //}
 
-                    Picasso.with(Local_image_3dcube.this).load(file_path).placeholder(R.drawable.placeholderdevzillad).into(textViewPosition);
+                    Picasso.with(Local_image_3dcube.this).load(file_path).placeholder(R.drawable.placeholderdevzillad).resize(400, 400).into(textViewPosition);
                     //
 //                    ImageLoader img_loader =new ImageLoader(Local_image_3dcube.this);
 //                    img_loader.DisplayImage(url, Img_view);
@@ -755,7 +793,7 @@ public class Local_image_3dcube extends Activity {
         // After getting the image result from Aviary
         if (requestCode == 1) {
             Uri theURI = data.getData();
-            Toast.makeText(this, "Got Aviary!: " + theURI, Toast.LENGTH_SHORT).show();
+            //Toast.makeText(this, "Got Aviary!: " + theURI, Toast.LENGTH_SHORT).show();
             String stringUri;
             try {
 
@@ -909,10 +947,11 @@ public class Local_image_3dcube extends Activity {
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             final int position = getArguments().getInt(EXTRA_POSITION);
-            view = inflater.inflate(R.layout.mag_upload_view, container, false); //Contains empty RelativeLayout
+            view = inflater.inflate(R.layout.frame_videoview, container, false);  //Contains empty RelativeLayout
 
-            final ImageView Img_view = (ImageView) view.findViewById(R.id.Imag_upload_view);
-            VideoView video_Vw = (VideoView) view.findViewById(R.id.videoView);
+            final ImageView textViewPosition = (ImageView) view.findViewById(R.id.Imag_upload_view);
+            TextureVideoView video_Vw = (TextureVideoView) view.findViewById(R.id.frame_video_view);
+
 
             //
             //ArrayUtils.reverse(items);
@@ -923,46 +962,90 @@ public class Local_image_3dcube extends Activity {
             String url = arr.get(position);
             // Image_path4filter = url;
             if (url.endsWith(".mp4")) {
-                MediaController media_Controller;
-                DisplayMetrics dm;
                 video_Vw.setVisibility(View.VISIBLE);
-                Img_view.setVisibility(View.GONE);
-                media_Controller = new MediaController(Local_image_3dcube.this);
-                dm = new DisplayMetrics();
-                Local_image_3dcube.this.getWindowManager().getDefaultDisplay().getMetrics(dm);
-                int height = dm.heightPixels;
-                int width = dm.widthPixels;
-//                video_Vw.setMinimumWidth(width);
-//                video_Vw.setMinimumHeight(height);
-//                video_Vw.setMinimumWidth(400);
-//                video_Vw.setMinimumHeight(480);
-                video_Vw.setMediaController(null);
+                textViewPosition.setVisibility(View.GONE);
+//                    media_Controller = new MediaController(getActivity());
+//                    dm = new DisplayMetrics();
+//                    getActivity().getWindowManager().getDefaultDisplay().getMetrics(dm);
+//                    int height = dm.heightPixels;
+//                    int width = dm.widthPixels;
+//                    video_Vw.setMinimumWidth(width);
+//                    video_Vw.setMinimumHeight(height);
+//                    video_Vw.setMediaController(null);
                 //video_Vw.setVolume(0f, 0f);
+                Uri video = Uri.parse(url);
+                //Uri video = Uri.parse(url);
+                //  video_Vw.setVideoURI(video);
+                // video_Vw.setOnPreparedListener(PreparedListener);
+//                    video_Vw.setup(Uri.parse("http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4"));
+//                    video_Vw.requestFocus();
+//                    video_Vw.setFrameVideoViewListener(new FrameVideoViewListener() {
+//                        @Override
+//                        public void mediaPlayerPrepared(MediaPlayer mediaPlayer) {
+//                            mediaPlayer.start();
+//                        }
+//
+//                        @Override
+//                        public void mediaPlayerPrepareFailed(MediaPlayer mediaPlayer, String error) {
+//
+//                        }
+//                    });
+                video_Vw.setVideoURI(video);
+                // video_Vw.
+                video_Vw.setMediaController(null);
+                video_Vw.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                    @Override
+                    public void onPrepared(final MediaPlayer mp) {
+//                            startVideoPlayback();
+//                            startVideoAnimation();
+                        mp.setVolume(0f, 0f);
+                        mp.start();
+                        mp.setOnInfoListener(new MediaPlayer.OnInfoListener() {
+                            @Override
+                            public boolean onInfo(MediaPlayer mp, int what, int extra) {
+                                // video_Vw.setBackground(null);
+                                return true;
+                            }
+                        });
+                    }
+                });
+                video_Vw.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                    @Override
+                    public void onCompletion(MediaPlayer mp) {
+                        mp.start();
 
-                video_Vw.setVideoPath(url);
-                video_Vw.setOnPreparedListener(PreparedListener);
-                video_Vw.requestFocus();
+                        // video_Vw.animate().rotationBy(360.0f).setDuration(video_Vw.getDuration()).start();
+                    }
+                });
                 // video_Vw.start();
 
 
             } else {
-                if (video_Vw.isPlaying()) {
-                    video_Vw.pause();
-                }
+
                 video_Vw.setVisibility(View.GONE);
-                Img_view.setVisibility(View.VISIBLE);
+                textViewPosition.setVisibility(View.VISIBLE);
                 File file_path = new File(url);
 
                 try {
-                    Picasso.with(Local_image_3dcube.this).load(file_path).placeholder(R.drawable.placeholderdevzillad).into(Img_view);
+
+
+//                    if (model.contentEquals("GT-I9500")) {
+//                        Picasso.with(Local_image_3dcube.this).load(file_path).placeholder(R.drawable.placeholderdevzillad).into(Img_view);
+//                    } else {
+//                    Uri uri = Uri.fromFile(file_path);
+//                    Bitmap bmp = getDownsampledBitmap(Local_image_3dcube.this, uri, 100, 100);
+//                    //  Bitmap getDownsampledBitmap(Context ctx, Uri uri, int targetWidth, int targetHeight) {
+//                    Img_view.setImageBitmap(bmp);
+                    //}
+
+                    Picasso.with(Local_image_3dcube.this).load(file_path).placeholder(R.drawable.placeholderdevzillad).resize(400, 400).into(textViewPosition);
                     //
-                    //img_loader.DisplayImage(url, textViewPosition);
-                } catch (OutOfMemoryError error) {
+//                    ImageLoader img_loader =new ImageLoader(Local_image_3dcube.this);
+//                    img_loader.DisplayImage(url, Img_view);
+                } catch (java.lang.OutOfMemoryError error) {
 
                 }
             }
-
-            //textViewPosition.setBackgroundResource(COLORS[position]);
             return view;
         }
 

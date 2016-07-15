@@ -1,13 +1,17 @@
 package com.ToxicBakery.viewpager.transforms.example;
 
 
+import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.text.util.Linkify;
 import android.util.Log;
@@ -40,6 +44,7 @@ import dgcam.DgCamActivity;
 
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTabHost;
+import android.widget.Toast;
 
 
 public class MainActivity extends FragmentActivity implements TabHost.OnTabChangeListener, ViewPager.OnPageChangeListener {
@@ -154,10 +159,40 @@ public class MainActivity extends FragmentActivity implements TabHost.OnTabChang
                 // mViewPager.setCurrentItem(2);
 //                Intent i1 = new Intent(MainActivity.this,
 //                        Camera_activity.class);
-                Intent i1 = new Intent(MainActivity.this,
-                        DgCamActivity.class);
+                int permissionCheck = ContextCompat.checkSelfPermission(MainActivity.this,
+                        Manifest.permission.CAMERA);
+                int permissionCheck_ForGallery = ContextCompat.checkSelfPermission(MainActivity.this,
+                        Manifest.permission.READ_EXTERNAL_STORAGE);
+                int permissionCheck_For_Audio = ContextCompat.checkSelfPermission(MainActivity.this,
+                        Manifest.permission.RECORD_AUDIO);
+                if (permissionCheck == PackageManager.PERMISSION_DENIED) {
+//                    Intent i1 = new Intent(MainActivity.this,
+//                            DgCamActivity.class);
+//
+//                    startActivity(i1);
+                    ActivityCompat.requestPermissions(MainActivity.this,
+                            new String[]{Manifest.permission.CAMERA},
+                            1);
 
-                startActivity(i1);
+                    Toast.makeText(MainActivity.this, "you need to enable camera permission", Toast.LENGTH_LONG).show();
+                } else if (permissionCheck_ForGallery == PackageManager.PERMISSION_DENIED) {
+                    ActivityCompat.requestPermissions(MainActivity.this,
+                            new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                            2);
+                    Toast.makeText(MainActivity.this, "you need to enable External Storage permission", Toast.LENGTH_LONG).show();
+                }
+                else if (permissionCheck_For_Audio == PackageManager.PERMISSION_DENIED) {
+                    ActivityCompat.requestPermissions(MainActivity.this,
+                            new String[]{Manifest.permission.RECORD_AUDIO},
+                            3);
+                    Toast.makeText(MainActivity.this, "you need to enable Audio permission", Toast.LENGTH_LONG).show();
+                } else {
+                    Intent i1 = new Intent(MainActivity.this,
+                            DgCamActivity.class);
+
+                    startActivity(i1);
+                }
+
             }
         });
         Rlv_Setting.setOnClickListener(new OnClickListener() {
@@ -198,6 +233,7 @@ public class MainActivity extends FragmentActivity implements TabHost.OnTabChang
             public void onClick(View v) {
                 //new Logout().execute();
                 session.logoutUser();
+                finish();
             }
         });
         Txt_logout.setOnClickListener(new OnClickListener() {
@@ -276,9 +312,6 @@ public class MainActivity extends FragmentActivity implements TabHost.OnTabChang
         int pos = this.mTabHost.getCurrentTab();
         this.mViewPager.setCurrentItem(pos);
     }
-
-
-
 
 
     private class Logout extends AsyncTask<Void, String, Void> implements DialogInterface.OnCancelListener {
@@ -368,4 +401,61 @@ public class MainActivity extends FragmentActivity implements TabHost.OnTabChang
 
         }
     }
-}
+        @Override
+        public void onRequestPermissionsResult(int requestCode,
+                                               String permissions[], int[] grantResults) {
+            switch (requestCode) {
+                case 1: {
+                    // If request is cancelled, the result arrays are empty.
+                    if (grantResults.length > 0
+                            && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                        // permission was granted, yay! Do the
+                        // contacts-related task you need to do.
+                       // selectImage();
+                        Toast.makeText(MainActivity.this, "enabled camera", Toast.LENGTH_LONG).show();
+                    } else {
+                       // Toast.makeText(getActivity(), "you need to enable camera permission", Toast.LENGTH_LONG).show();
+                        // permission denied, boo! Disable the
+                        // functionality that depends on this permission.
+                    }
+                    return;
+                }
+                case 2: {
+                    // If request is cancelled, the result arrays are empty.
+                    if (grantResults.length > 0
+                            && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                        // permission was granted, yay! Do the
+                        // contacts-related task you need to do.
+                        // selectImage();
+                        Toast.makeText(MainActivity.this, "enabled external Storage", Toast.LENGTH_LONG).show();
+                    } else {
+                        // Toast.makeText(getActivity(), "you need to enable camera permission", Toast.LENGTH_LONG).show();
+                        // permission denied, boo! Disable the
+                        // functionality that depends on this permission.
+                    }
+                    return;
+                }
+                case 3: {
+                    // If request is cancelled, the result arrays are empty.
+                    if (grantResults.length > 0
+                            && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                        // permission was granted, yay! Do the
+                        // contacts-related task you need to do.
+                        // selectImage();
+                        Toast.makeText(MainActivity.this, "enabled Audio permission", Toast.LENGTH_LONG).show();
+                    } else {
+                        // Toast.makeText(getActivity(), "you need to enable camera permission", Toast.LENGTH_LONG).show();
+                        // permission denied, boo! Disable the
+                        // functionality that depends on this permission.
+                    }
+                    return;
+                }
+
+                // other 'case' lines to check for other
+                // permissions this app might request
+            }
+        }
+    }

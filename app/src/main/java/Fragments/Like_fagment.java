@@ -23,6 +23,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 
+import com.ToxicBakery.viewpager.transforms.example.Images_comment_screen;
 import com.ToxicBakery.viewpager.transforms.example.Other_user_profile;
 import com.ToxicBakery.viewpager.transforms.example.R;
 
@@ -66,7 +67,7 @@ public class Like_fagment extends Fragment {
     int paging_position = 0;
     int Scroll_position = 0;
     String paging = "0";
-    String Str_check_response;
+    String Str_check_response, UserName;
     String Str_check_Refresh = "NoScrolled";
 
     @Override
@@ -153,11 +154,23 @@ public class Like_fagment extends Fragment {
 
                             if (Str_Activity.contentEquals("liked")) {
                                 JSONObject c2 = c.getJSONObject("post_info");
+                                JSONObject c_userinfo = c.getJSONObject("user_info");
+                                String id = c_userinfo.getString("id");
+                                UserName = c_userinfo.getString("username");
+                                String postid = c2.getString("id");
+                                String Caption = c2.getString("caption");
+                                String status_like = c.getString("status");
+                                String media1_thumb_url = c2.getString("media1_thumb_url");
+                                String media2_thumb_url = c2.getString("media2_thumb_url");
+                                String media3_thumb_url = c2.getString("media3_thumb_url");
+                                String media4_thumb_url = c2.getString("media4_thumb_url");
                                 // String Str_follower_name = c.getString("follower_name");
                                 String Str_likedby_name = c.getString("likedby_name");
                                 String Str_likedof_name = c.getString("likedof_name");
-                                String Str_media1_url = c2.getString("media1_url");
+                                String Str_media1_url = c2.getString("media1_thumb_url");
                                 String Str_Profile_image = c.getString("likedby_image");
+
+                                String Strurls = media1_thumb_url + "," + media2_thumb_url + "," + media3_thumb_url + "," + media4_thumb_url;
 
                                 HashMap<String, String> activity_info = new HashMap<String, String>();
                                 activity_info.put("activityy", Str_Activity);
@@ -166,19 +179,27 @@ public class Like_fagment extends Fragment {
                                 activity_info.put("Str_Likedof_name", Str_likedof_name);
                                 activity_info.put("Str_Media1_url", Str_media1_url);
                                 activity_info.put("Str_Profile_image", Str_Profile_image);
+                                activity_info.put("userid", id);
+                                activity_info.put("username", UserName);
+                                activity_info.put("postid", postid);
+                                activity_info.put("caption", Caption);
+                                activity_info.put("status_like", status_like);
+                                activity_info.put("url", Strurls);
 
 
                                 Activity_array_list.add(activity_info);
                             } else if (Str_Activity.contentEquals("follow")) {
                                 String Str_follower = c.getString("follower_name");
                                 String Fillow_image = c.getString("follower_image");
-
-
+                                JSONObject c_userinfo = c.getJSONObject("user_info");
+                                String id = c_userinfo.getString("id");
+                                UserName = c_userinfo.getString("username");
                                 HashMap<String, String> activity_info = new HashMap<String, String>();
                                 activity_info.put("activityy", Str_Activity);
                                 //activity_info.put("str_Follower_name", Str_follower_name);
                                 activity_info.put("Followername", Str_follower);
-
+                                activity_info.put("userid", id);
+                                activity_info.put("username", UserName);
                                 activity_info.put("Str_Profile_image", Fillow_image);
                                 Activity_array_list.add(activity_info);
                             }
@@ -334,7 +355,7 @@ public class Like_fagment extends Fragment {
                 try {
                     try {
                         Picasso.with(contexts).load(imagess.get(position).get("Str_Media1_url")).placeholder(R.drawable.placeholderdevzillad).into(vh.Like_picture);
-                    }catch (OutOfMemoryError e){
+                    } catch (OutOfMemoryError e) {
                         e.printStackTrace();
                     }
                 } catch (java.lang.IllegalArgumentException e) {
@@ -357,6 +378,32 @@ public class Like_fagment extends Fragment {
 //                i1new.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 //                i1new.putExtra("User_detail", "@" + Liked_name);
 //                mAppContext.startActivity(i1new);
+
+//                    String str_id = images.get(position).get("Post_id");
+//                    String status_like = images.get(position).get("Liked");
+//                    String caption = images.get(position).get("Caption");
+//                    List_img = Array_img.get(position);
+//                    //Toast.makeText(mAppContext,"click "+id,Toast.LENGTH_LONG).show();
+//                    Intent lObjIntent = new Intent(contexts, Images_comment_screen.class);
+//                    lObjIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//                    lObjIntent.putExtra("images", List_img);
+//                    lObjIntent.putExtra("Post_id", str_id);
+//                    lObjIntent.putExtra("Check_follow", "GONE");
+//                    lObjIntent.putExtra("status_like", status_like);
+//                    lObjIntent.putExtra("caption", caption);
+//                    contexts.startActivity(lObjIntent);
+                    String str_id = imagess.get(position).get("postid");
+                    String status_like = imagess.get(position).get("status_like");
+                    String caption = imagess.get(position).get("caption");
+                    List_img = imagess.get(position).get("url");
+                    Intent lObjIntent = new Intent(mAppContext, Images_comment_screen.class);
+                    lObjIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    lObjIntent.putExtra("images", List_img);
+                    lObjIntent.putExtra("Post_id", str_id);
+                    lObjIntent.putExtra("Check_follow", "GONE");
+                    lObjIntent.putExtra("status_like", status_like);
+                    lObjIntent.putExtra("caption", caption);
+                    mAppContext.startActivity(lObjIntent);
                 }
             });
             vh.Img_profilepic.setOnClickListener(new View.OnClickListener() {
@@ -364,7 +411,8 @@ public class Like_fagment extends Fragment {
                 public void onClick(View v) {
                     Intent i1new = new Intent(mAppContext, Other_user_profile.class);
                     i1new.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    i1new.putExtra("User_detail", "@" + Liked_name);
+                    i1new.putExtra("User_detail", "@" + imagess.get(position).get("username"));
+                    i1new.putExtra("userid", imagess.get(position).get("userid"));
                     mAppContext.startActivity(i1new);
                 }
             });
@@ -379,7 +427,7 @@ public class Like_fagment extends Fragment {
                 //img_loader.DisplayImage(fl,vh.Img_profilepic);
                 try {
                     Picasso.with(contexts).load(imagess.get(position).get("Str_Profile_image")).placeholder(R.drawable.profile_placeholder).into(vh.Img_profilepic);
-                }catch (OutOfMemoryError e){
+                } catch (OutOfMemoryError e) {
                     e.printStackTrace();
                 }
             } catch (IllegalArgumentException e) {

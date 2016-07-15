@@ -1,10 +1,12 @@
 package com.ToxicBakery.viewpager.transforms.example;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -13,6 +15,8 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
@@ -118,6 +122,12 @@ public class Edit_profile extends Activity {
         } catch (java.lang.IllegalArgumentException e) {
             e.printStackTrace();
         }
+        gender.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                select_gender();
+            }
+        });
         rlvdone.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -149,7 +159,31 @@ public class Edit_profile extends Activity {
         profile_imageimg.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                selectImage();
+                int permissionCheck = ContextCompat.checkSelfPermission(Edit_profile.this,
+                        Manifest.permission.CAMERA);
+                int permissionCheck_ForGallery = ContextCompat.checkSelfPermission(Edit_profile.this,
+                        Manifest.permission.READ_EXTERNAL_STORAGE);
+                int permissionCheck_For_Audio = ContextCompat.checkSelfPermission(Edit_profile.this,
+                        Manifest.permission.RECORD_AUDIO);
+                if (permissionCheck == PackageManager.PERMISSION_DENIED) {
+//                    Intent i1 = new Intent(MainActivity.this,
+//                            DgCamActivity.class);
+//
+//                    startActivity(i1);
+                    ActivityCompat.requestPermissions(Edit_profile.this,
+                            new String[]{Manifest.permission.CAMERA},
+                            1);
+
+                    Toast.makeText(Edit_profile.this, "you need to enable camera permission", Toast.LENGTH_LONG).show();
+                } else if (permissionCheck_ForGallery == PackageManager.PERMISSION_DENIED) {
+                    ActivityCompat.requestPermissions(Edit_profile.this,
+                            new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                            2);
+                    Toast.makeText(Edit_profile.this, "you need to enable External Storage permission", Toast.LENGTH_LONG).show();
+                } else {
+                    selectImage();
+                }
+                //selectImage();
             }
         });
         Edit_profile.setOnClickListener(new View.OnClickListener() {
@@ -290,6 +324,32 @@ public class Edit_profile extends Activity {
         });
         builder.show();
     }
+
+
+    private void select_gender() {
+        final CharSequence[] items = {"Male", "Female",
+                "Others"};
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(Edit_profile.this);
+        builder.setTitle("Gender");
+        builder.setItems(items, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int item) {
+                if (items[item].equals("Male")) {
+                    gender.setText("Male");
+                    dialog.dismiss();
+                } else if (items[item].equals("Female")) {
+                    gender.setText("Female");
+                    dialog.dismiss();
+                } else if (items[item].equals("Others")) {
+                    gender.setText("Others");
+                    dialog.dismiss();
+                }
+            }
+        });
+        builder.show();
+    }
+
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -443,5 +503,47 @@ public class Edit_profile extends Activity {
             super.onPostExecute(result);
         }
 
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case 1: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    // permission was granted, yay! Do the
+                    // contacts-related task you need to do.
+                    // selectImage();
+                    Toast.makeText(Edit_profile.this, "enabled camera", Toast.LENGTH_LONG).show();
+                } else {
+                    // Toast.makeText(getActivity(), "you need to enable camera permission", Toast.LENGTH_LONG).show();
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                }
+                return;
+            }
+            case 2: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    // permission was granted, yay! Do the
+                    // contacts-related task you need to do.
+                    // selectImage();
+                    Toast.makeText(Edit_profile.this, "enabled external Storage", Toast.LENGTH_LONG).show();
+                } else {
+                    // Toast.makeText(getActivity(), "you need to enable camera permission", Toast.LENGTH_LONG).show();
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                }
+                return;
+            }
+
+            // other 'case' lines to check for other
+            // permissions this app might request
+        }
     }
 }

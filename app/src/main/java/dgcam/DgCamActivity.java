@@ -1130,7 +1130,11 @@ public class DgCamActivity extends Activity implements SensorEventListener {
 //        int width = dm.widthPixels;
 //        1600, 1200
         // recorder.setVideoSize(900, 480);
+       // recorder.setVideoSize(960, 540);
+        recorder.setVideoEncodingBitRate(1700000);
 
+        //Set the video frame rate
+        recorder.setVideoFrameRate(30);
 
         if (CameraId == Camera.CameraInfo.CAMERA_FACING_BACK) {
             recorder.setOrientationHint(90);

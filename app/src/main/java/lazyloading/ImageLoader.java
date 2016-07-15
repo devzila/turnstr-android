@@ -111,7 +111,7 @@ public class ImageLoader {
 
             //decode with inSampleSize
             BitmapFactory.Options o2 = new BitmapFactory.Options();
-            o2.inSampleSize=2;
+            o2.inSampleSize=1;
             FileInputStream stream2=new FileInputStream(f);
             try {
                 Bitmap bitmap = BitmapFactory.decodeStream(stream2, null, o2);

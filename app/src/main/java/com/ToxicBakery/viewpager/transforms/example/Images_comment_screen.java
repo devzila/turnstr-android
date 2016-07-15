@@ -20,6 +20,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.animation.CycleInterpolator;
 import android.view.animation.TranslateAnimation;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
@@ -88,16 +89,19 @@ public class Images_comment_screen extends Activity {
     RelativeLayout rlv;
     EmojiconEditText edt_post_comment;
     ArrayList<HashMap<String, String>> Comment_array = new ArrayList<HashMap<String, String>>();
-    String Str_comment;
+    String Str_comment,userid;
     ListView lv_comment;
     ImageView img_like, Back_img, Img_share;
     String like_status = "0";
-    String user_id, Str_caption;
+    String user_id, Str_caption,Follow_Status;
     TextView txt_caption;
     String[] items;
     Button btn_back;
     String url;
-
+    TextView Txt_follow_unfollow;
+    RelativeLayout rlv_follow_unfollow;
+    String Share_url,Check_followStatus;
+//Rlveditprofile
     //ImageView img_cross;
     static {
         TRANSFORM_CLASSES = new ArrayList<>();
@@ -114,6 +118,8 @@ public class Images_comment_screen extends Activity {
         setContentView(R.layout.activity_images_comment_screen);
         lv_comment = (ListView) findViewById(R.id.lv_comment);
         rlv = (RelativeLayout) findViewById(R.id.relativeLayout18);
+        rlv_follow_unfollow= (RelativeLayout) findViewById(R.id.relativeLayout38);
+        Txt_follow_unfollow = (TextView)findViewById(R.id.textView55);
         edt_post_comment = (EmojiconEditText) findViewById(R.id.editText8);
         img_like = (ImageView) findViewById(R.id.imageView8);
         Img_Cross = (ImageView) findViewById(R.id.imageView34);
@@ -136,6 +142,10 @@ public class Images_comment_screen extends Activity {
         images = intent.getStringExtra("images");
         Post_id = intent.getStringExtra("Post_id");
         Str_caption = intent.getStringExtra("caption");
+        Check_followStatus =intent.getStringExtra("Check_follow");
+        rlv_follow_unfollow.setVisibility(View.GONE);
+
+
         // like_status = intent.getStringExtra("status_like");
 
         lv_comment.addHeaderView(header);
@@ -219,7 +229,7 @@ public class Images_comment_screen extends Activity {
             public void onClick(View v) {
                 Intent sendIntent = new Intent();
                 sendIntent.setAction(Intent.ACTION_SEND);
-                sendIntent.putExtra(Intent.EXTRA_TEXT, "This is my text to send.");
+                sendIntent.putExtra(Intent.EXTRA_TEXT, Share_url);
                 sendIntent.setType("text/plain");
                 startActivity(sendIntent);
             }
@@ -241,19 +251,39 @@ public class Images_comment_screen extends Activity {
                 rlv.setVisibility(View.GONE);
             }
         });
+        rlv_follow_unfollow.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (Follow_Status.contentEquals("0")) {
+                    Txt_follow_unfollow.setText("Unfollow");
+                    Follow_Status = "1";
+                    new Follow_unfollow().execute();
 
+                } else if (Follow_Status.contentEquals("1")) {
+                    Txt_follow_unfollow.setText("Follow");
+                    Follow_Status = "0";
+                    new Follow_unfollow().execute();
+
+                }
+            }
+        });
         edt_post_comment.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView view, int actionId, KeyEvent event) {
                 int result = actionId & EditorInfo.IME_MASK_ACTION;
                 switch (result) {
                     case EditorInfo.IME_ACTION_DONE:
-                        Str_comment = edt_post_comment.getText().toString();
-                        //String paramString = URLEncodedUtils.format(params, "UTF-8");
-                         Str_comment = StringEscapeUtils.escapeJava(Str_comment);
-                      //  Str_comment=encodeMessage(Str_comment);
-                       // Str_comment=URLEncodedUtils.format(Str_comment, "UTF-8");
-                        new Post_comment().execute();
+                        if (edt_post_comment.getText().toString().contentEquals("")) {
+                            Animation anm = Shake_Animation();
+                            edt_post_comment.startAnimation(anm);
+                        }else {
+                            Str_comment = edt_post_comment.getText().toString();
+                            //String paramString = URLEncodedUtils.format(params, "UTF-8");
+                            Str_comment = StringEscapeUtils.escapeJava(Str_comment);
+                            //  Str_comment=encodeMessage(Str_comment);
+                            // Str_comment=URLEncodedUtils.format(Str_comment, "UTF-8");
+                            new Post_comment().execute();
+                        }
                         //Toast.makeText(getActivity(), "done", Toast.LENGTH_LONG).show();
                         break;
                     case EditorInfo.IME_ACTION_NEXT:
@@ -589,6 +619,9 @@ public class Images_comment_screen extends Activity {
                     jsonobject_like = jsonObj.getJSONObject("data");
                     Array_image = jsonobject_like.getJSONArray("comments");
                     like_status = jsonobject_like.getString("is_liked");
+                    Follow_Status = jsonobject_like.getString("is_Following");
+                    Share_url = jsonobject_like.getString("postUrl");
+                    userid = jsonobject_like.getString("postUserID");
                     for (int i = 0; i < Array_image.length(); i++) {
                         JSONObject c = Array_image.getJSONObject(i);
 
@@ -596,7 +629,7 @@ public class Images_comment_screen extends Activity {
                         String user_id = c.getString("user_id");
                         String post_id = c.getString("post_id");
                         String comments = c.getString("comments");
-                        String created_at = c.getString("created_at");
+                        String created_at = c.getString("createdTime");
                         String updated_at = c.getString("updated_at");
                         String Username = c.getString("username");
                         // like_status=c.getString("like");
@@ -646,8 +679,17 @@ public class Images_comment_screen extends Activity {
             adapter = new Comment_adapter(Images_comment_screen.this,
                     android.R.layout.simple_list_item_1, Comment_array,
                     getApplication());
+            if(Follow_Status.contentEquals("0")){
+                Txt_follow_unfollow.setText("Follow");
+            }else{
+                Txt_follow_unfollow.setText("Unfollow");
+            }
             lv_comment.setAdapter(adapter);
-
+            if(Check_followStatus.contentEquals("VISIBLE")){
+                rlv_follow_unfollow.setVisibility(View.VISIBLE);
+            }else {
+                rlv_follow_unfollow.setVisibility(View.GONE);
+            }
 
         }
 
@@ -945,5 +987,74 @@ public class Images_comment_screen extends Activity {
                     calloutEnd, 0);
 
         }
+    }
+
+    private class Follow_unfollow extends AsyncTask<Void, String, Void> implements DialogInterface.OnCancelListener {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+
+
+        }
+
+        @Override
+        protected Void doInBackground(Void... arg0) {
+            // Creating service handler class instance
+            publishProgress("Please wait...");
+
+            ServiceHandler sh = new ServiceHandler();
+            List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(1);
+            nameValuePairs.add(new BasicNameValuePair("following_id", userid));
+            nameValuePairs.add(new BasicNameValuePair("following_status", Follow_Status));
+
+
+            // Making a request to url and getting response
+            String jsonStr = sh.makeServiceCall_withHeader(Constant.Follow_unfollow,
+                    ServiceHandler.POST, nameValuePairs, accestoken, device_id);
+
+            Log.d("Response: ", "> " + jsonStr);
+
+            if (jsonStr != null) {
+                // try {
+                JSONObject jsonObj = null;
+                try {
+                    jsonObj = new JSONObject(jsonStr);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+
+                JSONArray Array_image = null;
+
+            } else {
+                Log.e("ServiceHandler", "Couldn't get any data from the url");
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            super.onPostExecute(result);
+
+            // Dismiss the progress dialog
+            //  new Follow_unfollow().execute();
+            //  new Explore_follow().execute();
+
+        }
+
+        @Override
+        public void onCancel(DialogInterface dialog) {
+
+        }
+    }
+    public Animation Shake_Animation() {
+        Animation shake = new TranslateAnimation(0, 5, 0, 0);
+        shake.setInterpolator(new CycleInterpolator(5));
+        shake.setDuration(300);
+
+
+        return shake;
     }
 }
