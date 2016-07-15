@@ -5,6 +5,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 
+import android.app.Application;
 import android.support.v4.app.FragmentManager;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -40,6 +41,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.support.v4.app.Fragment;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.GridView;
 import android.widget.ImageView;
@@ -51,6 +53,7 @@ import android.widget.Toast;
 import android.widget.VideoView;
 
 import com.ToxicBakery.viewpager.transforms.CubeOutTransformer;
+import com.ToxicBakery.viewpager.transforms.example.Follower_following_screen;
 import com.ToxicBakery.viewpager.transforms.example.Images_comment_screen;
 import com.ToxicBakery.viewpager.transforms.example.R;
 
@@ -74,6 +77,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -109,8 +113,8 @@ public class home_fragment extends Fragment {
     RecyclerView Lv;
     PopupWindow pwindo;
     String StrPost_id;
-    SwipeRefreshLayout SRL;
-    RelativeLayout Rlv_profile;
+    SwipeRefreshLayout SRL, Srl_other;
+    RelativeLayout Rlv_profile, Rlv_follow_other;
     TextView Txt_trnst;
     ImageView img_profileUser;
     String Str_Response;
@@ -124,6 +128,8 @@ public class home_fragment extends Fragment {
     GridView gridView;
     private LinearLayoutManager mLayoutManager;
     int paging_position = 1;
+    int paging_position_other = 0;
+    int Scroll_position_otheruser;
     String Str_username, Str_chaeck_username;
     //    private boolean loading = true;
 //    int pastVisiblesItems, visibleItemCount, totalItemCount,firstVisibleItem,previousTotal;
@@ -131,13 +137,18 @@ public class home_fragment extends Fragment {
     private int previousTotal = 0;
     private boolean loading = true;
     private int visibleThreshold = 5;
-    String Response, Str_check_response;
+    String Response, Str_check_response, Str_check_response_other, Check_follow;
     String Str_check_Refresh = "NoScrolled";
+    String paging_other = "0";
+    RelativeLayout Rlv_follow, Rlv_following;
+    TextView txtview_follow;
     int firstVisibleItem, visibleItemCount, totalItemCount;
 //    public home_fragment() {
 //      //  home_fragment hm =  new home_fragment();
 //        // empty constructor
 //    }
+
+    /////////////////////
 
 
     @Override
@@ -147,6 +158,7 @@ public class home_fragment extends Fragment {
         View rootView = inflater.inflate(R.layout.home_activity, container, false);
         Lv = (RecyclerView) rootView.findViewById(R.id.listView);
         SRL = (SwipeRefreshLayout) rootView.findViewById(R.id.swipeRefreshLayout);
+        Srl_other = (SwipeRefreshLayout) rootView.findViewById(R.id.swipeRefreshLayout_other);
         Rlv_profile = (RelativeLayout) rootView.findViewById(R.id.Rlv_profile);
         RlvDelete = (RelativeLayout) rootView.findViewById(R.id.Rlv_dlt);
         Txt_trnst = (TextView) rootView.findViewById(R.id.txtVw_trnstr);
@@ -159,10 +171,15 @@ public class home_fragment extends Fragment {
         Txvw_following = (TextView) rootView.findViewById(R.id.textView20);
         Txthash = (TextView) rootView.findViewById(R.id.Txt_hash);
         TxtLogout = (TextView) rootView.findViewById(R.id.Txtlogout);
+        Rlv_follow_other = (RelativeLayout) rootView.findViewById(R.id.Rlveditprofile);
+        Rlv_follow = (RelativeLayout) rootView.findViewById(R.id.relativeLayout10);
+        Rlv_following = (RelativeLayout) rootView.findViewById(R.id.rlvfollwing);
         img_profileUser = (ImageView) rootView.findViewById(R.id.imageView4);
+        txtview_follow = (TextView) rootView.findViewById(R.id.textView24);
         mResources = getActivity().getResources();
         mLayoutManager = new LinearLayoutManager(getActivity());
         Lv.setLayoutManager(mLayoutManager);
+
 
         //  Lv.seto
         SRL.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -179,8 +196,65 @@ public class home_fragment extends Fragment {
             }
 
         });
+        Srl_other.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                List_arrayHome.clear();
+                new Orher_user().execute();
+            }
+        });
+//        if (Str_usernameHome.contentEquals(Str_username)) {
+//            Rlv_follow_other.setVisibility(View.GONE);
+//            //Rlv_follow_other.setVisibility(View.VISIBLE);
+//        } else {
+//            Rlv_follow_other.setVisibility(View.VISIBLE);
+//            //Divider.setVisibility(View.GONE);
+//        }
+//        if(Check_follow.contentEquals("0")){
+//            txtview_follow.setText("Follow");
+//        }else{
+//            txtview_follow.setText("Unfollow");
+//        }
+        Rlv_follow_other.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (Check_follow.contentEquals("0")) {
+                    txtview_follow.setText("Unfollow");
+                    Check_follow = "1";
+                    new Follow_unfollow().execute();
 
+                } else if (Check_follow.contentEquals("1")) {
+                    txtview_follow.setText("Follow");
+                    Check_follow = "0";
+                    new Follow_unfollow().execute();
 
+                }
+
+                // follow_status
+            }
+        });
+        Rlv_follow.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent int_follower = new Intent(getActivity(), Follower_following_screen.class);
+
+                int_follower.putExtra("Status", "Followers");
+                int_follower.putExtra("userid", Str_idhome);
+                int_follower.putExtra("Screen_check", "other_user");
+                getActivity().startActivity(int_follower);
+
+            }
+        });
+        Rlv_following.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent int_follower = new Intent(getActivity(), Follower_following_screen.class);
+                int_follower.putExtra("Status", "Following");
+                int_follower.putExtra("userid", Str_idhome);
+                int_follower.putExtra("Screen_check", "other_user");
+                getActivity().startActivity(int_follower);
+            }
+        });
 //        Lv.addOnScrollListener(new EndlessRecyclerOnScrollListener(mLayoutManager) {
 //            @Override
 //            public void onLoadMore(int current_page) {
@@ -252,6 +326,10 @@ public class home_fragment extends Fragment {
                 Txt_trnst.setVisibility(View.VISIBLE);
                 Img_back.setVisibility(View.GONE);
                 Txthash.setVisibility(View.GONE);
+                img_profileUser.setImageResource(R.drawable.profile_placeholder);
+                txt_name.setText("Loading..");
+                //Txt_Username.setText(user_name);
+                Txt_Username.setText("Loading..");
                 if (CheckHash.contentEquals("hash")) {
                     CheckHash = "nohash";
                     new Login().execute();
@@ -329,7 +407,7 @@ public class home_fragment extends Fragment {
                         // looping through All Contacts
                         for (int i = 0; i < array1.length(); i++) {
                             JSONObject c = array1.getJSONObject(i);
-
+//createdTime
                             String id = c.getString("id");
                             String user_id = c.getString("user_id");
                             String caption = c.getString("caption");
@@ -349,6 +427,7 @@ public class home_fragment extends Fragment {
                             String Profile_pic = c.getString("profile_image");
                             String Total_comments = c.getString("total_comments");
                             String Total_like = c.getString("total_likes");
+                            String Created_time = c.getString("createdTime");
 
                             // String follow_status = c.getString("follow");
                             if (caption.contentEquals("null")) {
@@ -374,6 +453,7 @@ public class home_fragment extends Fragment {
                             Info.put("profile_picc", Profile_pic);
                             Info.put("Total_comments", Total_comments);
                             Info.put("Total_likes", Total_like);
+                            Info.put("Created_timee", Created_time);
                             //
                             // nfo.put("followstatus", follow_status);
                             data.add(Info);
@@ -530,6 +610,7 @@ public class home_fragment extends Fragment {
 
             contexts = parent.getContext();
             img_loader = new ImageLoader(contexts);
+            //   img_loader.clearCache();
             return new MyViewHolder(itemView);
         }
 
@@ -537,11 +618,12 @@ public class home_fragment extends Fragment {
         public void onBindViewHolder(final MyViewHolder holder, int position) {
             //  Movie movie = moviesList.get(position);
             Resources mResources;
+            //Info.put("Created_timee", Created_time);
             holder.Name.setText(imagess.get(position).get("username"));
-            String Str_day_time = imagess.get(position).get("created_at");
-            time_calculator time_lass = new time_calculator();
-            String Filtertime = time_lass.parseDate(Str_day_time);
-            holder.Day_time.setText(Filtertime);
+            String Str_day_time = imagess.get(position).get("Created_timee");
+//            time_calculator time_lass = new time_calculator();
+//            String Filtertime = time_lass.parseDate(Str_day_time);
+            holder.Day_time.setText(Str_day_time);
             //if (Response != null) {
 
 
@@ -570,7 +652,7 @@ public class home_fragment extends Fragment {
             FragmentManager fm = getFragmentManager();
             holder.mPager.setId(position + 1);
             mAdapter = new PageAdapter(fm);
-            // holder.mPager.setAdapter(new EndLessAdapter(getActivity(), mImageArray));
+             //holder.mPager.setAdapter(new EndLessAdapter(getActivity(), List_img));
             holder.mPager.setAdapter(mAdapter);
             holder.mPager.setOffscreenPageLimit(4);
             try {
@@ -589,8 +671,9 @@ public class home_fragment extends Fragment {
             try {
 
 
-                Picasso.with(contexts).load(Str_profile_pic).placeholder(R.drawable.profile_placeholder).into(holder.Circular_imagview);
+                Picasso.with(contexts).load(Str_profile_pic).placeholder(R.drawable.profile_placeholder).resize(80,80).centerCrop().into(holder.Circular_imagview);
             } catch (java.lang.IllegalArgumentException e) {
+                holder.Circular_imagview.setImageResource(R.drawable.profile_placeholder);
                 e.printStackTrace();
             }
             holder.Txt_comment.setText("Comments " + imagess.get(position).get("Total_comments"));
@@ -604,6 +687,8 @@ public class home_fragment extends Fragment {
                     Txt_trnst.setVisibility(View.GONE);
                     Img_back.setVisibility(View.VISIBLE);
                     Str_UserId = imagess.get(position).get("user_id");
+                    Scroll_position_otheruser = 0;
+                    List_arrayHome.clear();
                     new Orher_user().execute();
                 }
             });
@@ -706,30 +791,40 @@ public class home_fragment extends Fragment {
                     String str_id = imagess.get(id).get("Post_id");
                     String status_like = imagess.get(id).get("likestatus");
                     String caption = imagess.get(id).get("caption");
+                    String Check_username = imagess.get(id).get("username");
+                    String str_followfornextscreen;
+                    if (Str_username.contentEquals(Check_username)) {
+                         str_followfornextscreen = "GONE";
+                    }else{
+                         str_followfornextscreen = "VISIBLE";
+                    }
                     //Toast.makeText(mAppContext,"click "+id,Toast.LENGTH_LONG).show();
                     Intent lObjIntent = new Intent(contexts, Images_comment_screen.class);
                     lObjIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     lObjIntent.putExtra("images", List_img);
                     lObjIntent.putExtra("Post_id", str_id);
                     lObjIntent.putExtra("status_like", status_like);
+                    lObjIntent.putExtra("Check_follow", str_followfornextscreen);
                     lObjIntent.putExtra("caption", caption);
                     contexts.startActivity(lObjIntent);
                     //finish();
                 }
             });
-            if ((position >= getItemCount() - 1)) {
-                if (!Str_check_response.contentEquals("0")) {
-                    paging_position++;
-                    paging = String.valueOf(paging_position);
-                    // paging = "1";
-                    Scroll_position = position;
-                    Str_check_Refresh = "scrolled";
-                    new Login().execute();
-                    //System.out.println("Recycleview page Scrolling...."+position);
-                } else {
-                    Str_check_Refresh = "NoScrolled";
-                    paging_position = 0;
-                    paging = "0";
+            if(!CheckHash.contentEquals("hash")) {
+                if ((position >= getItemCount() - 1)) {
+                    if (!Str_check_response.contentEquals("0")) {
+                        paging_position++;
+                        paging = String.valueOf(paging_position);
+                        // paging = "1";
+                        Scroll_position = position;
+                        Str_check_Refresh = "scrolled";
+                        new Login().execute();
+                        //System.out.println("Recycleview page Scrolling...."+position);
+                    } else {
+                        Str_check_Refresh = "NoScrolled";
+                        paging_position = 0;
+                        paging = "0";
+                    }
                 }
             }
         }
@@ -808,7 +903,7 @@ public class home_fragment extends Fragment {
 
                 items = List_img.split(",");
 
-                String url = items[positionn];
+                String url = items[position];
                 // if (video_Vw.isPlaying()) {
                 // video_Vw.stopPlayback();
                 //  }
@@ -888,7 +983,7 @@ public class home_fragment extends Fragment {
                     textViewPosition.setVisibility(View.VISIBLE);
                     try {
 
-                        Picasso.with(contexts).load(items[position]).placeholder(R.drawable.placeholderdevzillad).into(textViewPosition);
+                         Picasso.with(contexts).load(items[position]).placeholder(R.drawable.placeholderdevzillad).resize(400, 400).centerCrop().into(textViewPosition);
                         //Picasso.with(getContext()).load(items[position]).placeholder(R.drawable.placeholderdevzillad).skipMemoryCache().into(textViewPosition);
                         //
                         //img_loader.DisplayImage(url, textViewPosition);
@@ -936,7 +1031,8 @@ public class home_fragment extends Fragment {
         protected void onPreExecute() {
             super.onPreExecute();
             JSONObject jsonnode, json_User;
-            List_arrayHome.clear();
+            // List_arrayHome.clear();
+            Srl_other.setRefreshing(true);
         }
 
         @Override
@@ -949,6 +1045,7 @@ public class home_fragment extends Fragment {
 
             List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(1);
             nameValuePairs.add(new BasicNameValuePair("user_id", Str_UserId));
+            nameValuePairs.add(new BasicNameValuePair("page", paging_other));
             //nameValuePairs.add(new BasicNameValuePair("access_token", accestoken));
             jsonStr = sh.makeServiceCall_withHeader(Constant.OtherUser,
                     ServiceHandler.POST, nameValuePairs, accestoken, device_id);
@@ -983,17 +1080,27 @@ public class home_fragment extends Fragment {
                     StrFollowerHome = json_User.getString("followers");
                     Str_usernameHome = json_User.getString("username");
                     Str_postcount = json_User.getString("post_count");
+                    Check_follow = json_User.getString("is_following");
+                    // Info.put("isfollowing", isfollowing);
+                    int array_size = array1.length();
+                    Str_check_response_other = String.valueOf(array_size);
                     for (int i = 0; i < array1.length(); i++) {
                         JSONObject c = array1.getJSONObject(i);
                         String media_url = c.getString("media1_url");
-
+                        String media1_thumb_url = c.getString("media1_thumb_url");
+                        String media2_thumb_url = c.getString("media2_thumb_url");
+                        String media3_thumb_url = c.getString("media3_thumb_url");
+                        String media4_thumb_url = c.getString("media4_thumb_url");
+                       String caption = c.getString("caption");
 
                         // tmp hashmap for single contact
                         HashMap<String, String> Profile_images = new HashMap<String, String>();
 
                         // adding each child node to HashMap key => value
-                        Profile_images.put("media_url", media_url);
-
+                        String grop_url = media1_thumb_url+","+media2_thumb_url+","+media3_thumb_url+","+media4_thumb_url;
+                        Profile_images.put("media_url", media1_thumb_url);
+                        Profile_images.put("caption", caption);
+                        Profile_images.put("allurl", grop_url);
 
                         // adding PostUrl to Array list
                         List_arrayHome.add(Profile_images);
@@ -1017,19 +1124,38 @@ public class home_fragment extends Fragment {
             super.onPostExecute(result);
             // Dismiss the progress dialog
             //pDialog.dismiss();
-            Grid_view_adapter adapter = new Grid_view_adapter(getActivity(),
+            Grid_view_adapter_profile_local adapter = new Grid_view_adapter_profile_local(getActivity(),
                     android.R.layout.simple_list_item_1, List_arrayHome, Array_img,
                     getActivity().getApplication());
             gridView.setAdapter(adapter);
+            gridView.setSelection(Scroll_position_otheruser);
             txt_name.setText(Str_namehome);
             //Txt_Username.setText(user_name);
             Txt_Username.setText(Str_usernameHome);
             Txt_post.setText(Str_postcount);
             Txt_follower.setText(StrFollowerHome);
             Txvw_following.setText(StrFollowingHome);
+            if (Str_usernameHome.contentEquals(Str_username)) {
+                Rlv_follow_other.setVisibility(View.GONE);
+                //Rlv_follow_other.setVisibility(View.VISIBLE);
+            } else {
+                Rlv_follow_other.setVisibility(View.VISIBLE);
+                //Divider.setVisibility(View.GONE);
+            }
+            if (Check_follow.contentEquals("0")) {
+                txtview_follow.setText("Follow");
+            } else {
+                txtview_follow.setText("Unfollow");
+            }
             // Txt_post.setText(Posts);
-            Picasso.with(getActivity()).load(image).placeholder(R.drawable.profile_placeholder).into(img_profileUser);
+            try {
+                Picasso.with(getActivity()).load(image).placeholder(R.drawable.profile_placeholder).into(img_profileUser);
+            } catch (java.lang.IllegalArgumentException e) {
+                e.printStackTrace();
+            }
+
             //img_loader.DisplayImage(image,img_profile);
+            Srl_other.setRefreshing(false);
         }
 
         @Override
@@ -1052,14 +1178,19 @@ public class home_fragment extends Fragment {
             pwindo.showAtLocation(layout, Gravity.CENTER, 0, 0);
             TextView close = (TextView) layout.findViewById(R.id.txt_cancel);
             ImageView Divider = (ImageView) layout.findViewById(R.id.imageView30);
+            ImageView Divider2 = (ImageView) layout.findViewById(R.id.imageView39);
             TextView Delete = (TextView) layout.findViewById(R.id.Txt_delete);
             TextView Report = (TextView) layout.findViewById(R.id.textView40);
             if (Str_chaeck_username.contentEquals(Str_username)) {
                 Delete.setVisibility(View.VISIBLE);
                 Divider.setVisibility(View.VISIBLE);
+                Report.setVisibility(View.GONE);
+                Divider2.setVisibility(View.GONE);
             } else {
                 Delete.setVisibility(View.GONE);
                 Divider.setVisibility(View.GONE);
+                Report.setVisibility(View.VISIBLE);
+                Divider2.setVisibility(View.VISIBLE);
             }
             Delete.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -1387,7 +1518,8 @@ public class home_fragment extends Fragment {
             // Creating service handler class instance
             // publishProgress("Please wait...");
 
-            String Response = makeServiceCall("http://stage.turnstr.net/api/tag/" + Str_HashWord + "?page=0");
+           // String Response = makeServiceCall("http://stage.turnstr.net/api/tag/" + Str_HashWord + "?page=0");
+            String Response = makeServiceCall("http://turnstr.net/api/tag/" + Str_HashWord + "?page=0");
 
             if (Response != null) {
                 try {
@@ -1531,7 +1663,8 @@ public class home_fragment extends Fragment {
         return response;
 
     }
-//    MediaPlayer.OnPreparedListener PreparedListener = new MediaPlayer.OnPreparedListener() {
+
+    //    MediaPlayer.OnPreparedListener PreparedListener = new MediaPlayer.OnPreparedListener() {
 //
 //        @Override
 //        public void onPrepared(MediaPlayer m) {
@@ -1551,5 +1684,202 @@ public class home_fragment extends Fragment {
 //            }
 //        }
 //    };
+    public class Grid_view_adapter_profile_local extends ArrayAdapter<String> {
+        private static final String KEY_SELECTED_PAGE = "KEY_SELECTED_PAGE";
+        private static final String KEY_SELECTED_CLASS = "KEY_SELECTED_CLASS";
+        ArrayList<String> Array_img = new ArrayList<String>();
+        private static final String TAG = "SampleAdapter";
 
+        private Context contexts;
+        private Application mAppContext;
+        private LayoutInflater mLayoutInflater = null;
+        private Random mRandom;
+        String List_img;
+
+        double km, lat_to, lon_to;
+        String strlat_to, str_long_to;
+        String Str_km = "";
+
+        ArrayList<HashMap<String, String>> images = new ArrayList<HashMap<String, String>>();
+
+        ImageLoader img_loader;
+
+        //img_loader.DisplayImage(url,textViewPosition);
+        public Grid_view_adapter_profile_local(Context context, int textViewResourceId,
+                                               ArrayList<HashMap<String, String>> images, ArrayList<String> Array_img, Application app) {
+            super(context, textViewResourceId);
+            this.mLayoutInflater = LayoutInflater.from(context);
+            this.mRandom = new Random();
+            this.images = images;
+            this.Array_img = Array_img;
+            mAppContext = app;
+
+
+            contexts = context;
+        }
+
+        @SuppressWarnings("static-access")
+        @Override
+        public View getView(final int position, View convertView,
+                            final ViewGroup parent) {
+
+            final ViewHolder vh;
+            String image = null;
+            img_loader = new ImageLoader(mAppContext);
+            if (convertView == null) {
+                convertView = mLayoutInflater.inflate(R.layout.gridview_item,
+                        parent, false);
+                vh = new ViewHolder();
+                //int selectedPage = 0;
+
+
+//       b }
+                vh.imgView = (ImageView) convertView.findViewById(R.id.picture);
+                convertView.setTag(vh);
+            } else {
+                vh = (ViewHolder) convertView.getTag();
+            }
+            try {
+                image = images.get(position).get("media_url");
+            } catch (java.lang.IndexOutOfBoundsException e) {
+                e.printStackTrace();
+            }
+
+            // img_loader.DisplayImage(image,vh.imgView);
+            try {
+                Picasso.with(contexts).load(image).placeholder(R.drawable.placeholderdevzillad).resize(150, 150).into(vh.imgView);
+            } catch (java.lang.IllegalArgumentException e) {
+                e.printStackTrace();
+            }
+//// Intent lObjIntent = new Intent(contexts, Images_comment_screen.class);
+//            lObjIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//            lObjIntent.putExtra("images", List_img);
+//            lObjIntent.putExtra("Post_id", str_id);
+//            lObjIntent.putExtra("status_like", status_like);
+//            lObjIntent.putExtra("Check_follow", str_followfornextscreen);
+//            lObjIntent.putExtra("caption", caption);
+
+            vh.imgView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    //Profile_images.put("allurl", grop_url);
+                    String str_id = images.get(position).get("Post_id");
+                    String status_like = images.get(position).get("Liked");
+                    String caption = images.get(position).get("caption");
+                    List_img = images.get(position).get("allurl");
+                    String str_followfornextscreen;
+                   if (Str_usernameHome.contentEquals(Str_username)) {
+                        str_followfornextscreen = "GONE";
+                    }else{
+                        str_followfornextscreen = "VISIBLE";
+                    }
+                    //Toast.makeText(mAppContext,"click "+id,Toast.LENGTH_LONG).show();
+                    Intent lObjIntent = new Intent(contexts, Images_comment_screen.class);
+                    lObjIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    lObjIntent.putExtra("images", List_img);
+                    lObjIntent.putExtra("Post_id", str_id);
+                    lObjIntent.putExtra("status_like", status_like);
+                    lObjIntent.putExtra("Check_follow", str_followfornextscreen);
+                    lObjIntent.putExtra("caption", caption);
+                    contexts.startActivity(lObjIntent);
+                }
+            });
+
+            if ((position >= getCount() - 1)) {
+                if (!Str_check_response_other.contentEquals("0")) {
+                    paging_position_other++;
+                    paging_other = String.valueOf(paging_position_other);
+                    // paging = "1";
+                    Scroll_position_otheruser = position;
+                    // Str_check_Refresh = "scrolled";
+                    new Orher_user().execute();
+                    //System.out.println("Recycleview page Scrolling...."+position);
+                } else {
+                    // Str_check_Refresh = "NoScrolled";
+                    paging_position_other = 0;
+                    paging_other = "0";
+                }
+            }
+
+            //convertView.setTag(vh);
+            return convertView;
+        }
+
+
+        class ViewHolder {
+            ImageView imgView;
+
+
+        }
+
+        @Override
+        public int getCount() {
+
+            return images.size();
+        }
+
+
+    }
+
+    private class Follow_unfollow extends AsyncTask<Void, String, Void> implements DialogInterface.OnCancelListener {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+
+
+        }
+
+        @Override
+        protected Void doInBackground(Void... arg0) {
+            // Creating service handler class instance
+            publishProgress("Please wait...");
+
+            ServiceHandler sh = new ServiceHandler();
+            List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(1);
+            nameValuePairs.add(new BasicNameValuePair("following_id", Str_idhome));
+            nameValuePairs.add(new BasicNameValuePair("following_status", Check_follow));
+
+
+            // Making a request to url and getting response
+            String jsonStr = sh.makeServiceCall_withHeader(Constant.Follow_unfollow,
+                    ServiceHandler.POST, nameValuePairs, accestoken, device_id);
+
+            Log.d("Response: ", "> " + jsonStr);
+
+            if (jsonStr != null) {
+                // try {
+                JSONObject jsonObj = null;
+                try {
+                    jsonObj = new JSONObject(jsonStr);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+
+                JSONArray Array_image = null;
+
+            } else {
+                Log.e("ServiceHandler", "Couldn't get any data from the url");
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            super.onPostExecute(result);
+            List_arrayHome.clear();
+            new Orher_user().execute();
+            // Dismiss the progress dialog
+            //  new Follow_unfollow().execute();
+            //  new Explore_follow().execute();
+
+        }
+
+        @Override
+        public void onCancel(DialogInterface dialog) {
+
+        }
+    }
 }

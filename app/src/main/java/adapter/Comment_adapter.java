@@ -40,7 +40,7 @@ import com.ToxicBakery.viewpager.transforms.CubeOutTransformer;
 import com.ToxicBakery.viewpager.transforms.example.Images_comment_screen;
 import com.ToxicBakery.viewpager.transforms.example.Other_user_profile;
 import com.ToxicBakery.viewpager.transforms.example.R;
-import com.squareup.picasso.Picasso;
+
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -55,6 +55,7 @@ import circular_imagview.CircularImageView;
 import hani.momanii.supernova_emoji_library.Helper.EmojiconTextView;
 import hashTag.CalloutLink;
 import hashTag.Hashtag;
+import it.sephiroth.android.library.picasso.Picasso;
 import lazyloading.ImageLoader;
 import view_pager.viewpager;
 
@@ -138,21 +139,31 @@ public class Comment_adapter extends ArrayAdapter<String> implements
        // vh.Comment.setText(imagess.get(position).get("comments"));
         vh.Name.setText(imagess.get(position).get("username"));
         String Str_day_time = imagess.get(position).get("created_at");
-        time_calculator time_lass = new time_calculator();
-        String Filtertime = time_lass.parseDate(Str_day_time);
-        vh.time.setText(Filtertime);
+//        time_calculator time_lass = new time_calculator();
+//        String Filtertime = time_lass.parseDate(Str_day_time);
+        vh.time.setText(Str_day_time);
 
 
         // Set the ImageView image as drawable object
         // vh.Img_profilepic.setImageDrawable(roundedBitmapDrawable);
-        img_loader = new ImageLoader(mAppContext);
-        img_loader.DisplayImage(imagess.get(position).get("profile_image"), vh.Img_profilepic);
+        //img_loader = new ImageLoader(mAppContext);
+        try {
+            try {
+                Picasso.with(contexts).load(imagess.get(position).get("profile_image")).resize(50,50).centerCrop().placeholder(R.drawable.profile_placeholder).into(vh.Img_profilepic);
+            }catch (OutOfMemoryError e){
+                e.printStackTrace();
+            }
+        } catch (java.lang.IllegalArgumentException e) {
+            e.printStackTrace();
+        }
+       // img_loader.DisplayImage(imagess.get(position).get("profile_image"), vh.Img_profilepic);
         vh.Img_profilepic.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent i1new = new Intent(mAppContext, Other_user_profile.class);
                 i1new.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 i1new.putExtra("User_detail", "@"+imagess.get(position).get("username"));
+                i1new.putExtra("userid",imagess.get(position).get("user_id"));
                 mAppContext.startActivity(i1new);
             }
         });

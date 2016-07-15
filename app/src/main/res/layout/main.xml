@@ -246,7 +246,7 @@
             android:indeterminate="false"
             android:progress="5000"
             android:max="5000"
-            android:progressDrawable="@drawable/progress_drawable"
+
             android:visibility="gone"
             android:layout_gravity="center_horizontal|bottom"
             android:layout_alignParentTop="true"

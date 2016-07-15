@@ -52,6 +52,7 @@ import android.widget.Toast;
 import android.widget.VideoView;
 
 import com.ToxicBakery.viewpager.transforms.CubeOutTransformer;
+import com.ToxicBakery.viewpager.transforms.example.Follower_following_screen;
 import com.ToxicBakery.viewpager.transforms.example.Images_comment_screen;
 import com.ToxicBakery.viewpager.transforms.example.R;
 import com.sprylab.android.widget.TextureVideoView;
@@ -105,7 +106,7 @@ public class Explorer_fragment extends Fragment {
     Button Btn_back;
     Session_manager session;
     String accestoken;
-    SwipeRefreshLayout SRL, SRL_recycle;
+    SwipeRefreshLayout SRL, SRL_recycle, Srl_other;
     SampleAdapter sample_adapter;
     ArrayList<String> Array_single_image = new ArrayList<String>();
     ArrayList<String> Array_Follow = new ArrayList<String>();
@@ -122,20 +123,25 @@ public class Explorer_fragment extends Fragment {
     ImageView img_profileUser;
     String Str_CheckProfile = "profilehidden";
     String CheckHash = "nohash";
-    TextView tXtVw_Explore;
+    TextView tXtVw_Explore, Txt_follower, Txvw_following, txtview_follow;
     PopupWindow pwindo;
     int paging_position = 0;
     int Scroll_position = 0;
     String paging = "0";
-    String Str_check_response;
+    String Str_check_response, Str_check_response_other, Str_postcount, Check_follow;
     String Str_check_Refresh = "NoScrolled";
-
+    int paging_position_other = 0;
+    int Scroll_position_otheruser;
+    RelativeLayout Rlv_follow, Rlv_following,Rlv_follow_other;
+    String paging_other = "0";
+//Rlveditprofile
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
         View rootView = inflater.inflate(R.layout.activity_explorer__screen, container, false);
         gridView = (GridView) rootView.findViewById(R.id.gridview);
+        Srl_other = (SwipeRefreshLayout) rootView.findViewById(R.id.swipeRefreshLayout_other);
         edt_Text_search = (EditText) rootView.findViewById(R.id.editText6);
         img_cross = (ImageView) rootView.findViewById(R.id.imageView29);
         Lv_explorer = (RecyclerView) rootView.findViewById(R.id.listView2);
@@ -147,8 +153,14 @@ public class Explorer_fragment extends Fragment {
         Rlv_search = (RelativeLayout) rootView.findViewById(R.id.linearLayout8);
         Rlv_profile = (RelativeLayout) rootView.findViewById(R.id.Rlv_profile);
         Btn_back = (Button) rootView.findViewById(R.id.butt_back);
+        txtview_follow = (TextView) rootView.findViewById(R.id.textView24);
         img_profileUser = (ImageView) rootView.findViewById(R.id.imageView4);
-        gridViewnew = (GridView) rootView.findViewById(R.id.gridviewnew);
+        Txt_follower = (TextView) rootView.findViewById(R.id.textView19);
+        gridViewnew = (GridView) rootView.findViewById(R.id.gridview_otheruser);
+        Txvw_following = (TextView) rootView.findViewById(R.id.textView20);
+        Rlv_follow = (RelativeLayout) rootView.findViewById(R.id.relativeLayout10);
+        Rlv_following = (RelativeLayout) rootView.findViewById(R.id.rlvfollwing);
+        Rlv_follow_other = (RelativeLayout) rootView.findViewById(R.id.Rlveditprofile);
         SRL = (SwipeRefreshLayout) rootView.findViewById(R.id.swipeRefreshLayout);
         SRL_recycle = (SwipeRefreshLayout) rootView.findViewById(R.id.swipeRefreshLayoutRecycleview);
         session = new Session_manager(getActivity().getApplicationContext());
@@ -188,7 +200,41 @@ public class Explorer_fragment extends Fragment {
 
             }
         });
+        Srl_other.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                List_arrayHome.clear();
+                new Orher_user().execute();
+            }
+        });
+        Rlv_follow.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent int_follower = new Intent(getActivity(), Follower_following_screen.class);
 
+                int_follower.putExtra("Status", "Followers");
+                int_follower.putExtra("userid", Str_idhome);
+                int_follower.putExtra("Screen_check", "other_user");
+                getActivity().startActivity(int_follower);
+
+            }
+        });
+        Rlv_following.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent int_follower = new Intent(getActivity(), Follower_following_screen.class);
+                int_follower.putExtra("Status", "Following");
+                int_follower.putExtra("userid", Str_idhome);
+                int_follower.putExtra("Screen_check", "other_user");
+                getActivity().startActivity(int_follower);
+            }
+        });
+        Rlv_follow_other.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
         new Explorer().execute();
 
         edt_Text_search.setOnEditorActionListener(new TextView.OnEditorActionListener() {
@@ -234,7 +280,10 @@ public class Explorer_fragment extends Fragment {
                     SRL_recycle.setVisibility(View.VISIBLE);
                     Rlv_profile.setVisibility(View.GONE);
                     Str_CheckProfile = "profilehidden";
-
+                    List_arrayHome.clear();
+                    paging_other = "0";
+                    // paging = "1";
+                    Scroll_position_otheruser = 0;
                     img_profileUser.setImageResource(R.drawable.profile_placeholder);
                     txt_name.setText("Loading..");
                     //Txt_Username.setText(user_name);
@@ -635,29 +684,53 @@ public class Explorer_fragment extends Fragment {
         public void onBindViewHolder(final MyViewHolder holder, int position) {
             //  Movie movie = moviesList.get(position);
             Resources mResources;
+
             holder.Name.setText(imagess.get(position).get("username"));
             String username = imagess.get(position).get("username");
-            if (Array_FollowCheck.contains(username)) {
+            String Check_userFollow_status = imagess.get(position).get("isfollowing");
+
+            if (Check_userFollow_status.contentEquals("1")) {
                 holder.Follow_Textview.setText("UnFollow");
-            } else {
+            } else if (Check_userFollow_status.contentEquals("0")) {
                 // Array_FollowCheck.add(username);
                 holder.Follow_Textview.setText("Follow");
             }
+//            if (Array_FollowCheck.contains(username)) {
+//                holder.Follow_Textview.setText("UnFollow");
+//            } else {
+//                // Array_FollowCheck.add(username);
+//                holder.Follow_Textview.setText("Follow");
+//            }
             holder.Rlv_Follow.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (Array_FollowCheck.contains(username)) {
-                        Array_FollowCheck.remove(username);
+                    if (Check_userFollow_status.contentEquals("1")) {
+                        // Array_FollowCheck.remove(username);
+                        Userid = imagess.get(position).get("user_id");
                         follow_status = "0";
+                        List_Array.clear();
+                        Array_img.clear();
+                        Array_Follow.clear();
+                        Scroll_position = position;
+                        data.clear();
+                        Array_img.clear();
+                        Array_single_image.clear();
 
-                        Userid = imagess.get(position).get("user_id");
-                        holder.Follow_Textview.setText("Follow");
+                        //holder.Follow_Textview.setText("Follow");
                         new Follow_unfollow().execute();
-                    } else {
-                        Array_FollowCheck.add(username);
-                        follow_status = "1";
+                    } else if (Check_userFollow_status.contentEquals("0")) {
+                        //Array_FollowCheck.add(username);
                         Userid = imagess.get(position).get("user_id");
-                        holder.Follow_Textview.setText("UnFollow");
+                        follow_status = "1";
+                        List_Array.clear();
+                        Array_img.clear();
+                        Array_Follow.clear();
+                        Scroll_position = position;
+                        data.clear();
+                        Array_img.clear();
+                        Array_single_image.clear();
+
+                        //holder.Follow_Textview.setText("Follow");
                         new Follow_unfollow().execute();
                     }
                 }
@@ -744,8 +817,14 @@ public class Explorer_fragment extends Fragment {
                     int positionn = holder.mPager.getId();
                     positionn = positionn - 1;
 //                String postion = String.valueOf(positionn);
-                    List_img = Array_imgadpter.get(positionn);
-                    items = List_img.split(",");
+
+                    try {
+                        List_img = Array_imgadpter.get(positionn);
+                        items = List_img.split(",");
+
+                    } catch (java.lang.IndexOutOfBoundsException e) {
+                        e.printStackTrace();
+                    }
 
                 }
 
@@ -754,8 +833,13 @@ public class Explorer_fragment extends Fragment {
                     int positionn = holder.mPager.getId();
                     positionn = positionn - 1;
 //                String postion = String.valueOf(positionn);
-                    List_img = Array_imgadpter.get(positionn);
-                    items = List_img.split(",");
+                    try {
+                        List_img = Array_imgadpter.get(positionn);
+                        items = List_img.split(",");
+
+                    } catch (java.lang.IndexOutOfBoundsException e) {
+                        e.printStackTrace();
+                    }
 
                 }
 
@@ -765,8 +849,13 @@ public class Explorer_fragment extends Fragment {
                     int positionn = holder.mPager.getId();
                     positionn = positionn - 1;
 //                String postion = String.valueOf(positionn);
-                    List_img = Array_imgadpter.get(positionn);
-                    items = List_img.split(",");
+                    try {
+                        List_img = Array_imgadpter.get(positionn);
+                        items = List_img.split(",");
+
+                    } catch (java.lang.IndexOutOfBoundsException e) {
+                        e.printStackTrace();
+                    }
 
 
                 }
@@ -798,6 +887,7 @@ public class Explorer_fragment extends Fragment {
                     //Toast.makeText(mAppContext,"click "+id,Toast.LENGTH_LONG).show();
                     Intent lObjIntent = new Intent(contexts, Images_comment_screen.class);
                     lObjIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    lObjIntent.putExtra("Check_follow", "VISIBLE");
                     lObjIntent.putExtra("images", List_img);
                     lObjIntent.putExtra("Post_id", str_id);
                     // lObjIntent.putExtra("status_like", status_like);
@@ -806,20 +896,21 @@ public class Explorer_fragment extends Fragment {
                     //finish();
                 }
             });
-
-            if ((position >= getItemCount() - 1)) {
-                if (!Str_check_response.contentEquals("0")) {
-                    paging_position++;
-                    paging = String.valueOf(paging_position);
-                    // paging = "1";
-                    Scroll_position = position;
-                    Str_check_Refresh = "scrolled";
-                    new Explore_follow().execute();
-                    //System.out.println("Recycleview page Scrolling...."+position);
-                } else {
-                    Str_check_Refresh = "NoScrolled";
-                    paging_position = 0;
-                    paging = "0";
+            if(!CheckHash.contentEquals("hash")) {
+                if ((position >= getItemCount() - 1)) {
+                    if (!Str_check_response.contentEquals("0")) {
+                        paging_position++;
+                        paging = String.valueOf(paging_position);
+                        // paging = "1";
+                        Scroll_position = position;
+                        Str_check_Refresh = "scrolled";
+                        new Explore_follow().execute();
+                        //System.out.println("Recycleview page Scrolling...."+position);
+                    } else {
+                        Str_check_Refresh = "NoScrolled";
+                        paging_position = 0;
+                        paging = "0";
+                    }
                 }
             }
         }
@@ -890,6 +981,7 @@ public class Explorer_fragment extends Fragment {
                         public void onPrepared(final MediaPlayer mp) {
 //                            startVideoPlayback();
 //                            startVideoAnimation();
+                            mp.setVolume(0f, 0f);
                             mp.start();
                             mp.setOnInfoListener(new MediaPlayer.OnInfoListener() {
                                 @Override
@@ -919,9 +1011,9 @@ public class Explorer_fragment extends Fragment {
                     textViewPosition.setVisibility(View.VISIBLE);
                     try {
 
-                        Picasso.with(contexts).load(items[position]).placeholder(R.drawable.placeholderdevzillad).into(textViewPosition);
+                        // Picasso.with(contexts).load(items[position]).placeholder(R.drawable.placeholderdevzillad).resize(400, 400).centerCrop().into(textViewPosition);
                         //
-                        // img_loader.DisplayImage(url, textViewPosition);
+                        img_loader.DisplayImage(url, textViewPosition);
 
 
                     } catch (OutOfMemoryError error) {
@@ -1177,9 +1269,10 @@ public class Explorer_fragment extends Fragment {
         @Override
         protected void onPostExecute(Void result) {
             super.onPostExecute(result);
+
             // Dismiss the progress dialog
             //  new Follow_unfollow().execute();
-
+            new Explore_follow().execute();
 
         }
 
@@ -1201,7 +1294,8 @@ public class Explorer_fragment extends Fragment {
         protected void onPreExecute() {
             super.onPreExecute();
             JSONObject jsonnode, json_User;
-            List_arrayHome.clear();
+            //List_arrayHome.clear();
+            Srl_other.setRefreshing(true);
         }
 
         @Override
@@ -1214,6 +1308,7 @@ public class Explorer_fragment extends Fragment {
 
             List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(1);
             nameValuePairs.add(new BasicNameValuePair("user_id", Str_UserId));
+            nameValuePairs.add(new BasicNameValuePair("page", paging_other));
             //nameValuePairs.add(new BasicNameValuePair("access_token", accestoken));
             jsonStr = sh.makeServiceCall_withHeader(Constant.OtherUser,
                     ServiceHandler.POST, nameValuePairs, accestoken, device_id);
@@ -1240,17 +1335,33 @@ public class Explorer_fragment extends Fragment {
                     StrFollowingHome = json_User.getString("following");
                     StrFollowerHome = json_User.getString("followers");
                     Str_usernameHome = json_User.getString("username");
-
+                    Str_postcount = json_User.getString("post_count");
+                    Check_follow = json_User.getString("is_following");
+                    int array_size = array1.length();
+                    Str_check_response_other = String.valueOf(array_size);
                     for (int i = 0; i < array1.length(); i++) {
                         JSONObject c = array1.getJSONObject(i);
                         String media_url = c.getString("media1_url");
-
+                        String caption = c.getString("caption");
+                       // String media_url = c.getString("media1_url");
+                        String media1_thumb_url = c.getString("media1_thumb_url");
+                        String media2_thumb_url = c.getString("media2_thumb_url");
+                        String media3_thumb_url = c.getString("media3_thumb_url");
+                        String media4_thumb_url = c.getString("media4_thumb_url");
+                      //  String caption = c.getString("caption");
 
                         // tmp hashmap for single contact
                         HashMap<String, String> Profile_images = new HashMap<String, String>();
 
                         // adding each child node to HashMap key => value
-                        Profile_images.put("media_url", media_url);
+                        String grop_url = media1_thumb_url+","+media2_thumb_url+","+media3_thumb_url+","+media4_thumb_url;
+                        Profile_images.put("media_url", media1_thumb_url);
+                        Profile_images.put("caption", caption);
+                        Profile_images.put("allurl", grop_url);
+
+
+                        // tmp hashmap for single contact
+
 
 
                         // adding PostUrl to Array list
@@ -1275,14 +1386,32 @@ public class Explorer_fragment extends Fragment {
             super.onPostExecute(result);
             // Dismiss the progress dialog
             //pDialog.dismiss();
-            Picasso.with(getActivity()).load(image).placeholder(R.drawable.profile_placeholder).into(img_profileUser);
-            explore_gridviewadapter adapter = new explore_gridviewadapter(getActivity(),
-                    android.R.layout.simple_list_item_1, List_arrayHome,
+            //Picasso.with(getActivity()).load(image).placeholder(R.drawable.profile_placeholder).into(img_profileUser);
+            Grid_view_adapter_profile_local_explore adapter = new Grid_view_adapter_profile_local_explore(getActivity(),
+                    android.R.layout.simple_list_item_1, List_arrayHome, Array_img,
                     getActivity().getApplication());
             gridViewnew.setAdapter(adapter);
+            gridViewnew.setSelection(Scroll_position_otheruser);
             txt_name.setText(Str_namehome);
             //Txt_Username.setText(user_name);
             Txt_Username.setText(Str_usernameHome);
+            Txt_post.setText(Str_postcount);
+            Txt_follower.setText(StrFollowerHome);
+            Txvw_following.setText(StrFollowingHome);
+            if (Check_follow.contentEquals("0")) {
+                txtview_follow.setText("Follow");
+            } else {
+                txtview_follow.setText("Unfollow");
+            }
+            // Txt_post.setText(Posts);
+            try {
+                Picasso.with(getActivity()).load(image).placeholder(R.drawable.profile_placeholder).into(img_profileUser);
+            } catch (java.lang.IllegalArgumentException e) {
+                e.printStackTrace();
+            }
+
+            //img_loader.DisplayImage(image,img_profile);
+            Srl_other.setRefreshing(false);
             // Txt_post.setText(Posts);
 
             //img_loader.DisplayImage(image,img_profile);
@@ -1325,8 +1454,9 @@ public class Explorer_fragment extends Fragment {
             // Creating service handler class instance
             // publishProgress("Please wait...");
 
-            String Response = makeServiceCall("http://stage.turnstr.net/api/tag/" + Str_HashWord + "?page=0");
-
+            //String Response = makeServiceCall("http://stage.turnstr.net/api/tag/" + Str_HashWord + "?page=0");
+            //String Response = makeServiceCall("http://turnstr.net/api/tag/" + Str_HashWord + "?page=0");
+            String Response = makeServiceCallfor_hashtag("http://turnstr.net/api/tag/" + Str_HashWord + "?page=0");
             if (Response != null) {
                 try {
                     JSONObject jsonObj = null;
@@ -1338,6 +1468,9 @@ public class Explorer_fragment extends Fragment {
 
                     // Getting JSON Array node
                     // JSONArray array1 = null;
+                    try{
+
+
                     str = jsonObj.getString("status");
                     if (str.contentEquals("true")) {
                         //jsonnode = jsonObj.getJSONObject("data");
@@ -1364,6 +1497,7 @@ public class Explorer_fragment extends Fragment {
                             String created_at = c.getString("created_at");
                             String updated_at = c.getString("updated_at");
                             String like_status = c.getString("liked");
+                            String isfollowing = c.getString("is_following");
                             String Profile_pic = c.getString("profile_image");
                             String Total_comments = c.getString("total_comments");
                             String Total_like = c.getString("total_likes");
@@ -1392,6 +1526,7 @@ public class Explorer_fragment extends Fragment {
                             Info.put("profile_picc", Profile_pic);
                             Info.put("Total_comments", Total_comments);
                             Info.put("Total_likes", Total_like);
+                            Info.put("isfollowing", isfollowing);
                             //
                             // nfo.put("followstatus", follow_status);
                             data.add(Info);
@@ -1405,6 +1540,9 @@ public class Explorer_fragment extends Fragment {
 //						Ostype= jsonnode.getString("device_id");
                         }
                         // looping through All Contacts
+                    }
+                    }catch (java.lang.RuntimeException e){
+                        e.printStackTrace();
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -1657,13 +1795,17 @@ public class Explorer_fragment extends Fragment {
             }
             String image = images.get(position).get("media_url");
             try {
-               // img_loader.DisplayImage(image, vh.imgView);
+                // img_loader.DisplayImage(image, vh.imgView);
+                // img_loader.clearCache();
+                // img_loader.DisplayImage(image, vh.imgView);
+                // img_loader.
 
-            Picasso.with(contexts).load(image).placeholder(R.drawable.placeholderdevzillad).resize(90,90).into(vh.imgView);
+                Picasso.with(contexts).load(image).placeholder(R.drawable.placeholderdevzillad).resize(130, 130).centerCrop().into(vh.imgView);
             } catch (OutOfMemoryError e) {
                 e.printStackTrace();
             }
             if ((position >= getCount() - 1)) {
+                if(images.size()!=1){
                 if (!Str_check_response.contentEquals("0")) {
                     paging_position++;
                     paging = String.valueOf(paging_position);
@@ -1671,6 +1813,7 @@ public class Explorer_fragment extends Fragment {
                     Scroll_position = position;
                     Str_check_Refresh = "scrolled";
                     new Explorer().execute();
+                }
                     //System.out.println("Recycleview page Scrolling...."+position);
                 } else {
                     Str_check_Refresh = "NoScrolled";
@@ -1695,6 +1838,171 @@ public class Explorer_fragment extends Fragment {
             return images.size();
         }
 
+
+    }
+
+
+    public class Grid_view_adapter_profile_local_explore extends ArrayAdapter<String> {
+        private static final String KEY_SELECTED_PAGE = "KEY_SELECTED_PAGE";
+        private static final String KEY_SELECTED_CLASS = "KEY_SELECTED_CLASS";
+        ArrayList<String> Array_img = new ArrayList<String>();
+        private static final String TAG = "SampleAdapter";
+
+        private Context contexts;
+        private Application mAppContext;
+        private LayoutInflater mLayoutInflater = null;
+        private Random mRandom;
+        String List_img;
+
+        double km, lat_to, lon_to;
+        String strlat_to, str_long_to;
+        String Str_km = "";
+
+        ArrayList<HashMap<String, String>> images = new ArrayList<HashMap<String, String>>();
+
+        ImageLoader img_loader;
+
+        //img_loader.DisplayImage(url,textViewPosition);
+        public Grid_view_adapter_profile_local_explore(Context context, int textViewResourceId,
+                                                       ArrayList<HashMap<String, String>> images, ArrayList<String> Array_img, Application app) {
+            super(context, textViewResourceId);
+            this.mLayoutInflater = LayoutInflater.from(context);
+            this.mRandom = new Random();
+            this.images = images;
+            this.Array_img = Array_img;
+            mAppContext = app;
+
+
+            contexts = context;
+        }
+
+        @SuppressWarnings("static-access")
+        @Override
+        public View getView(final int position, View convertView,
+                            final ViewGroup parent) {
+
+            final ViewHolder vh;
+            String image = null;
+            img_loader = new ImageLoader(mAppContext);
+            if (convertView == null) {
+                convertView = mLayoutInflater.inflate(R.layout.gridview_item,
+                        parent, false);
+                vh = new ViewHolder();
+                //int selectedPage = 0;
+
+
+//       b }
+                vh.imgView = (ImageView) convertView.findViewById(R.id.picture);
+                convertView.setTag(vh);
+            } else {
+                vh = (ViewHolder) convertView.getTag();
+            }
+            try {
+                image = images.get(position).get("media_url");
+            } catch (java.lang.IndexOutOfBoundsException e) {
+                e.printStackTrace();
+            }
+
+            // img_loader.DisplayImage(image,vh.imgView);
+            try {
+                Picasso.with(contexts).load(image).placeholder(R.drawable.placeholderdevzillad).resize(150, 150).centerCrop().into(vh.imgView);
+            } catch (java.lang.IllegalArgumentException e) {
+                e.printStackTrace();
+            }
+
+
+            vh.imgView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    String str_id = images.get(position).get("Post_id");
+                    String status_like = images.get(position).get("Liked");
+                    String caption = images.get(position).get("caption");
+                    List_img = images.get(position).get("allurl");
+                    //Toast.makeText(mAppContext,"click "+id,Toast.LENGTH_LONG).show();
+                    Intent lObjIntent = new Intent(contexts, Images_comment_screen.class);
+                    lObjIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    lObjIntent.putExtra("images", List_img);
+                    lObjIntent.putExtra("Post_id", str_id);
+                    lObjIntent.putExtra("Check_follow", "VISIBLE");
+                    lObjIntent.putExtra("status_like", status_like);
+                    lObjIntent.putExtra("caption", caption);
+                    contexts.startActivity(lObjIntent);
+                }
+            });
+
+            if ((position >= getCount() - 1)) {
+                if(images.size()!=1){
+                if (!Str_check_response_other.contentEquals("0")) {
+                    paging_position_other++;
+                    paging_other = String.valueOf(paging_position_other);
+                    // paging = "1";
+                    Scroll_position_otheruser = position;
+                    // Str_check_Refresh = "scrolled";
+                    new Orher_user().execute();
+                }
+                    //System.out.println("Recycleview page Scrolling...."+position);
+                } else {
+                    // Str_check_Refresh = "NoScrolled";
+                    paging_position_other = 0;
+                    paging_other = "0";
+                }
+            }
+
+            //convertView.setTag(vh);
+            return convertView;
+        }
+
+
+        class ViewHolder {
+            ImageView imgView;
+
+
+        }
+
+        @Override
+        public int getCount() {
+
+            return images.size();
+        }
+
+
+    }
+    public String makeServiceCallfor_hashtag(String url) {
+        String response = null;
+        try {
+            // http client
+            DefaultHttpClient httpClient = new DefaultHttpClient();
+            HttpEntity httpEntity = null;
+            HttpResponse httpResponse = null;
+
+            // Checking http request method type
+
+//				if (params != null) {
+//					String paramString = URLEncodedUtils
+//							.format(params, "utf-8");
+//					url += "?" + paramString;
+//				}
+
+            HttpGet httpGet = new HttpGet(url);
+            httpGet.addHeader("X-TOKEN", accestoken);
+            httpGet.addHeader("X-DEVICE", device_id);
+
+
+            httpResponse = httpClient.execute(httpGet);
+
+
+            httpEntity = httpResponse.getEntity();
+            response = EntityUtils.toString(httpEntity);
+
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (ClientProtocolException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return response;
 
     }
 }

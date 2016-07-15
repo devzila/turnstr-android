@@ -36,7 +36,7 @@ public class Follower_following_screen extends Activity {
     TextView Txt_tittle;
     Session_manager session;
     ArrayList<HashMap<String, String>> Array_list_Follower_following = new ArrayList<HashMap<String, String>>();
-    String accestoken, device_id,Status;
+    String accestoken, device_id, Status, userid, Screen_check;
 
 
     @Override
@@ -57,8 +57,13 @@ public class Follower_following_screen extends Activity {
         device_id = user.get(session.device_id);
         Intent intent = getIntent();
         Status = intent.getStringExtra("Status");
+        userid = intent.getStringExtra("userid");
+        Screen_check = intent.getStringExtra("Screen_check");
         Txt_tittle.setText(Status);
+
         new Follower_unfollowing().execute();
+
+
         Img_back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -88,13 +93,27 @@ public class Follower_following_screen extends Activity {
 
             List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(1);
 
-            //nameValuePairs.add(new BasicNameValuePair("access_token", accestoken));
-            if(Status.contentEquals("Follower")) {
-                jsonStr = sh.makeServiceCall_withHeader(Constant.Followers_me,
-                        ServiceHandler.GET, nameValuePairs, accestoken, device_id);
-            }else{
-                jsonStr = sh.makeServiceCall_withHeader(Constant.Followings_me,
-                        ServiceHandler.GET, nameValuePairs, accestoken, device_id);
+            //nameValuePairs.add(new BasicNameValuePair("user_id", userid));
+            if (Screen_check.contentEquals("me")) {
+                if (Status.contentEquals("Followers")) {
+                    jsonStr = sh.makeServiceCall_withHeader(Constant.Followers_me,
+                            ServiceHandler.GET, nameValuePairs, accestoken, device_id);
+                } else {
+                    jsonStr = sh.makeServiceCall_withHeader(Constant.Followings_me,
+                            ServiceHandler.GET, nameValuePairs, accestoken, device_id);
+                }
+            } else {
+                if (Status.contentEquals("Followers")) {
+//                    jsonStr = sh.makeServiceCall_withHeader("http://stage.turnstr.net/api/user/"+userid+"/followers",
+//                            ServiceHandler.GET, nameValuePairs, accestoken, device_id);
+                    jsonStr = sh.makeServiceCall_withHeader("http://turnstr.net/api/user/" + userid + "/followers",
+                            ServiceHandler.GET, nameValuePairs, accestoken, device_id);
+                } else {
+//                    jsonStr = sh.makeServiceCall_withHeader("http://stage.turnstr.net/api/user/"+userid+"/followings",
+//                            ServiceHandler.GET, nameValuePairs, accestoken, device_id);
+                    jsonStr = sh.makeServiceCall_withHeader("http://turnstr.net/api/user/" + userid + "/followings",
+                            ServiceHandler.GET, nameValuePairs, accestoken, device_id);
+                }
             }
             if (jsonStr != null) {
                 try {
@@ -111,7 +130,8 @@ public class Follower_following_screen extends Activity {
 
                     for (int i = 0; i < array1.length(); i++) {
                         JSONObject c = array1.getJSONObject(i);
-                        String name = c.getString("name");
+                        String name = c.getString("username");
+                        String userid = c.getString("id");
                         String profile_pic = c.getString("profile_image");
 
 
@@ -121,6 +141,7 @@ public class Follower_following_screen extends Activity {
                         // adding each child node to HashMap key => value
                         Profile_images.put("name", name);
                         Profile_images.put("profile_pic", profile_pic);
+                        Profile_images.put("id", userid);
 
 
                         // adding PostUrl to Array list

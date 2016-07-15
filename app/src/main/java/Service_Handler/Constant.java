@@ -1,8 +1,8 @@
 package Service_Handler;
 
 public interface Constant {
-    String Server = "http://stage.turnstr.net/";
-   // String Server = "http://turnstr.net/";
+    //String Server = "http://stage.turnstr.net/";
+     String Server = "http://turnstr.net/";
     String Login = Server + "api/login";
     String Register = Server + "api/register";
     String Fetch_posts = Server + "api/posts";
@@ -25,6 +25,8 @@ public interface Constant {
     String report_inappropriate = Server + "api/markInappropriate";
     String Followers_me = Server + "api/followersList";
     String Followings_me = Server + "api/me/followings";
+//    String Followings_user = Server + "api/me/followings";
+//    String Followers_user = Server + "api/me/followings";
     String Fb_login = Server + "api/login/facebook";
 
 

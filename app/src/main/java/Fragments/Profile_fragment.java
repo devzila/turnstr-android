@@ -1,10 +1,14 @@
 package Fragments;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Application;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -15,17 +19,21 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.provider.Settings;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.ToxicBakery.viewpager.transforms.example.Edit_profile;
 import com.ToxicBakery.viewpager.transforms.example.Follower_following_screen;
@@ -34,12 +42,15 @@ import com.ToxicBakery.viewpager.transforms.example.R;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -53,11 +64,15 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Random;
 
 import Multipart_enttity.AndroidMultiPartEntity;
 import Service_Handler.Constant;
 import Session_handler.Session_manager;
 import adapter.Grid_view_adapter;
+import dgcam.DgCamActivity;
+import it.sephiroth.android.library.picasso.Picasso;
 import lazyloading.ImageLoader;
 
 
@@ -84,6 +99,11 @@ public class Profile_fragment extends Fragment {
     ImageLoader img_loader;
     ArrayList<String> Array_imgProfile = new ArrayList<String>();
     SwipeRefreshLayout SRL;
+    int paging_position = 0;
+    int Scroll_position = 0;
+    String paging = "0";
+    String Str_check_response,user_id;
+    String Str_check_Refresh = "NoScrolled";
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -112,7 +132,11 @@ public class Profile_fragment extends Fragment {
         SRL.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                new Profile_Posts().execute();
+                Array_imgProfile.clear();
+                List_array.clear();
+                paging = "0";
+                new User_profile().execute();
+               //User_profile new Profile_Posts().execute();
             }
 
         });
@@ -125,7 +149,59 @@ public class Profile_fragment extends Fragment {
         img_profile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                selectImage();
+                //selectImage();
+                // Here, thisActivity is the current activity
+//                if (ContextCompat.checkSelfPermission(getActivity(),
+//                        Manifest.permission.READ_CONTACTS)
+//                        != PackageManager.PERMISSION_GRANTED) {
+//
+//                    // Should we show an explanation?
+//                    if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),
+//                            Manifest.permission.CAMERA)) {
+//
+//                        // Show an expanation to the user *asynchronously* -- don't block
+//                        // this thread waiting for the user's response! After the user
+//                        // sees the explanation, try again to request the permission.
+//
+//                    } else {
+//
+//                        // No explanation needed, we can request the permission.
+//
+//                        ActivityCompat.requestPermissions(getActivity(),
+//                                new String[]{Manifest.permission.CAMERA},
+//                                1);
+//
+//                        // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
+//                        // app-defined int constant. The callback method gets the
+//                        // result of the request.
+//                    }
+//                }
+
+                int permissionCheck = ContextCompat.checkSelfPermission(getActivity(),
+                        Manifest.permission.CAMERA);
+                int permissionCheck_ForGallery = ContextCompat.checkSelfPermission(getActivity(),
+                        Manifest.permission.READ_EXTERNAL_STORAGE);
+                int permissionCheck_For_Audio = ContextCompat.checkSelfPermission(getActivity(),
+                        Manifest.permission.RECORD_AUDIO);
+                if (permissionCheck == PackageManager.PERMISSION_DENIED) {
+//                    Intent i1 = new Intent(MainActivity.this,
+//                            DgCamActivity.class);
+//
+//                    startActivity(i1);
+                    ActivityCompat.requestPermissions(getActivity(),
+                            new String[]{Manifest.permission.CAMERA},
+                            1);
+
+                    Toast.makeText(getActivity(), "you need to enable camera permission", Toast.LENGTH_LONG).show();
+                } else if (permissionCheck_ForGallery == PackageManager.PERMISSION_DENIED) {
+                    ActivityCompat.requestPermissions(getActivity(),
+                            new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                            2);
+                    Toast.makeText(getActivity(), "you need to enable External Storage permission", Toast.LENGTH_LONG).show();
+                } else {
+                    selectImage();
+                }
+
             }
         });
         rlv_edt_profile.setOnClickListener(new View.OnClickListener() {
@@ -140,7 +216,10 @@ public class Profile_fragment extends Fragment {
             public void onClick(View v) {
                 Intent int_follower = new Intent(getActivity(), Follower_following_screen.class);
 
-                int_follower.putExtra("Status", "Follower");
+                int_follower.putExtra("Status", "Followers");
+                int_follower.putExtra("userid", user_id);
+                int_follower.putExtra("Screen_check", "me");
+
                 getActivity().startActivity(int_follower);
 
             }
@@ -150,6 +229,8 @@ public class Profile_fragment extends Fragment {
             public void onClick(View v) {
                 Intent int_follower = new Intent(getActivity(), Follower_following_screen.class);
                 int_follower.putExtra("Status", "Following");
+                int_follower.putExtra("userid", user_id);
+                int_follower.putExtra("Screen_check", "me");
                 getActivity().startActivity(int_follower);
             }
         });
@@ -208,6 +289,7 @@ public class Profile_fragment extends Fragment {
                     image = json_User.getString("profile_image");
                     //  user_name = json_User.getString("name");
                     Name = json_User.getString("name");
+                    user_id = json_User.getString("id");
                     user_name = json_User.getString("username");
                     Posts = json_User.getString("postCount");
                     Email = json_User.getString("email");
@@ -246,8 +328,12 @@ public class Profile_fragment extends Fragment {
             Txt_post.setText(Posts);
             Txt_follower.setText(Str_follower);
             Txt_following.setText(StrFollowing);
-            //   Picasso.with(getActivity()).load(image).placeholder(R.drawable.profile_placeholder).into(img_profile);
-            img_loader.DisplayImage(image, img_profile);
+            try {
+                Picasso.with(getActivity()).load(image).placeholder(R.drawable.profile_placeholder).into(img_profile);
+            }catch (java.lang.IllegalArgumentException e){
+                e.printStackTrace();
+            }
+            //img_loader.DisplayImage(image, img_profile);
             List_array.clear();
             new Profile_Posts().execute();
         }
@@ -269,8 +355,9 @@ public class Profile_fragment extends Fragment {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            Array_imgProfile.clear();
-            List_array.clear();
+            SRL.setRefreshing(true);
+//            Array_imgProfile.clear();
+//            List_array.clear();
 
             //   mProgressHUD = ProgressHUD.show(HomeActivity.this, "Connecting", true, true, this);
 
@@ -299,14 +386,16 @@ public class Profile_fragment extends Fragment {
                         jsonnode = jsonObj.getJSONObject("data");
                         JSONArray array1 = null;
                         array1 = jsonnode.getJSONArray("postDetails");
-
+                        int array_size = array1.length();
+                        Str_check_response = String.valueOf(array_size);
                         // looping through All Contacts
                         for (int i = 0; i < array1.length(); i++) {
                             JSONObject c = array1.getJSONObject(i);
+                            String media_url1 = c.getString("media1_thumb_url");
                             String media_url = c.getString("media1_url");
-                            String media_url2 = c.getString("media2_url");
-                            String media_url3 = c.getString("media3_url");
-                            String media_url4 = c.getString("media4_url");
+                            String media_url2 = c.getString("media2_thumb_url");
+                            String media_url3 = c.getString("media3_thumb_url");
+                            String media_url4 = c.getString("media4_thumb_url");
                             String Caption = c.getString("caption");
                             String Liked = c.getString("liked");
                             String is_following = c.getString("is_following");
@@ -317,7 +406,7 @@ public class Profile_fragment extends Fragment {
                             HashMap<String, String> Profile_images = new HashMap<String, String>();
 
                             // adding each child node to HashMap key => value
-                            Profile_images.put("media_url", media_url);
+                            Profile_images.put("media_url", media_url1);
                             Profile_images.put("Caption", Caption);
                             Profile_images.put("Liked", Liked);
                             Profile_images.put("is_following", is_following);
@@ -326,7 +415,7 @@ public class Profile_fragment extends Fragment {
 
                             // adding contact to contact list
                             List_array.add(Profile_images);
-                            Array_imgProfile.add(media_url + "," + media_url2 + "," + media_url3 + "," + media_url4);
+                            Array_imgProfile.add(media_url1 + "," + media_url2 + "," + media_url3 + "," + media_url4);
 
                         }
 
@@ -347,11 +436,13 @@ public class Profile_fragment extends Fragment {
             super.onPostExecute(result);
             // Dismiss the progress dialog
             // pDialog.dismiss();
+            SRL.setRefreshing(false);
             try {
-                Grid_view_adapter adapter = new Grid_view_adapter(getActivity(),
+                Grid_view_adapter_profile_local adapter = new Grid_view_adapter_profile_local(getActivity(),
                         android.R.layout.simple_list_item_1, List_array, Array_imgProfile,
                         getActivity().getApplication());
                 gridView.setAdapter(adapter);
+                gridView.setSelection(Scroll_position);
                 SRL.setRefreshing(false);
             } catch (java.lang.NullPointerException e) {
                 e.printStackTrace();
@@ -372,12 +463,14 @@ public class Profile_fragment extends Fragment {
             DefaultHttpClient httpClient = new DefaultHttpClient();
             HttpEntity httpEntity = null;
             HttpResponse httpResponse = null;
+            List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(1);
 
+            nameValuePairs.add(new BasicNameValuePair("page", paging));
 
             HttpPost http_post = new HttpPost(url);
             http_post.addHeader("X-TOKEN", accestoken);
             http_post.addHeader("X-DEVICE", device_id);
-
+            http_post.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 
             httpResponse = httpClient.execute(http_post);
 
@@ -632,5 +725,165 @@ public class Profile_fragment extends Fragment {
         alert.show();
     }
 
+    public class Grid_view_adapter_profile_local extends ArrayAdapter<String> {
+        private static final String KEY_SELECTED_PAGE = "KEY_SELECTED_PAGE";
+        private static final String KEY_SELECTED_CLASS = "KEY_SELECTED_CLASS";
+        ArrayList<String> Array_img = new ArrayList<String>();
+        private static final String TAG = "SampleAdapter";
 
+        private Context contexts;
+        private Application mAppContext;
+        private LayoutInflater mLayoutInflater = null;
+        private Random mRandom;
+        String List_img;
+
+        double km, lat_to, lon_to;
+        String strlat_to, str_long_to;
+        String Str_km = "";
+
+        ArrayList<HashMap<String, String>> images = new ArrayList<HashMap<String, String>>();
+
+        ImageLoader img_loader;
+
+        //img_loader.DisplayImage(url,textViewPosition);
+        public Grid_view_adapter_profile_local(Context context, int textViewResourceId,
+                                               ArrayList<HashMap<String, String>> images, ArrayList<String> Array_img, Application app) {
+            super(context, textViewResourceId);
+            this.mLayoutInflater = LayoutInflater.from(context);
+            this.mRandom = new Random();
+            this.images = images;
+            this.Array_img = Array_img;
+            mAppContext = app;
+
+
+            contexts = context;
+        }
+
+        @SuppressWarnings("static-access")
+        @Override
+        public View getView(final int position, View convertView,
+                            final ViewGroup parent) {
+
+            final ViewHolder vh;
+            img_loader = new ImageLoader(mAppContext);
+            if (convertView == null) {
+                convertView = mLayoutInflater.inflate(R.layout.gridview_item,
+                        parent, false);
+                vh = new ViewHolder();
+                //int selectedPage = 0;
+
+
+//       b }
+                vh.imgView = (ImageView) convertView.findViewById(R.id.picture);
+                convertView.setTag(vh);
+            } else {
+                vh = (ViewHolder) convertView.getTag();
+            }
+            String image = images.get(position).get("media_url");
+            //String image =  Array_img.get(position);
+            // img_loader.DisplayImage(image,vh.imgView);
+            try {
+                Picasso.with(contexts).load(image).placeholder(R.drawable.placeholderdevzillad).resize(150, 150).into(vh.imgView);
+            }catch (java.lang.IllegalArgumentException e){
+                e.fillInStackTrace();
+            }
+            vh.imgView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    String str_id = images.get(position).get("Post_id");
+                    String status_like = images.get(position).get("Liked");
+                    String caption = images.get(position).get("Caption");
+                    List_img = Array_img.get(position);
+                    //Toast.makeText(mAppContext,"click "+id,Toast.LENGTH_LONG).show();
+                    Intent lObjIntent = new Intent(contexts, Images_comment_screen.class);
+                    lObjIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    lObjIntent.putExtra("images", List_img);
+                    lObjIntent.putExtra("Post_id", str_id);
+                    lObjIntent.putExtra("Check_follow", "GONE");
+                    lObjIntent.putExtra("status_like", status_like);
+                    lObjIntent.putExtra("caption", caption);
+                    contexts.startActivity(lObjIntent);
+                }
+            });
+
+            if ((position >= getCount() - 1)) {
+                if(images.size()!=1){
+                if (!Str_check_response.contentEquals("0")) {
+                    paging_position++;
+                    paging = String.valueOf(paging_position);
+                    // paging = "1";
+                    Scroll_position = position;
+                    Str_check_Refresh = "scrolled";
+                    new Profile_Posts().execute();
+                }
+                    //System.out.println("Recycleview page Scrolling...."+position);
+                } else {
+                    Str_check_Refresh = "NoScrolled";
+                    paging_position = 0;
+                    paging = "0";
+                }
+            }
+
+            //convertView.setTag(vh);
+            return convertView;
+        }
+
+
+        class ViewHolder {
+            ImageView imgView;
+
+
+        }
+
+        @Override
+        public int getCount() {
+
+            return images.size();
+        }
+
+
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case 1: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    // permission was granted, yay! Do the
+                    // contacts-related task you need to do.
+                    // selectImage();
+                    Toast.makeText(getActivity(), "enabled camera", Toast.LENGTH_LONG).show();
+                } else {
+                    // Toast.makeText(getActivity(), "you need to enable camera permission", Toast.LENGTH_LONG).show();
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                }
+                return;
+            }
+            case 2: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    // permission was granted, yay! Do the
+                    // contacts-related task you need to do.
+                    // selectImage();
+                    Toast.makeText(getActivity(), "enabled external Storage", Toast.LENGTH_LONG).show();
+                } else {
+                    // Toast.makeText(getActivity(), "you need to enable camera permission", Toast.LENGTH_LONG).show();
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                }
+                return;
+            }
+
+
+            // other 'case' lines to check for other
+            // permissions this app might request
+        }
+    }
 }

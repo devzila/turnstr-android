@@ -64,7 +64,7 @@
         android:layout_alignParentStart="true"
         android:layout_below="@+id/relativeLayout22"
         android:indeterminate="false"
-        android:progressDrawable="@drawable/progress_drawable"
+
         android:visibility="visible" />
 
     <RelativeLayout
@@ -145,7 +145,7 @@
 
                 android:id="@+id/container"
                 android:layout_width="match_parent"
-                android:layout_height="300dp"
+                android:layout_height="200dp"
 
 
                 android:layout_alignParentLeft="true"
@@ -181,7 +181,7 @@
                     android:layout_alignParentStart="true"
                     android:layout_centerVertical="true"
                     android:layout_marginLeft="5dp"
-                    android:src="@drawable/back" />
+                    android:src="@drawable/backblack" />
 
                 <Button
                     android:id="@+id/Buttn_uploadd"
@@ -213,8 +213,7 @@
                 android:gravity="top|left"
                 android:hint="Add caption"
                 android:visibility="visible"
-                android:layout_marginTop="10dp"
-                android:background="@color/aviary_adjust_internal_stroke_color" />
+                android:layout_marginTop="10dp" />
 
 
         </RelativeLayout>

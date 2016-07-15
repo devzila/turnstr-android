@@ -69,6 +69,7 @@ public class activity_adapter extends ArrayAdapter<String> implements
     private Random mRandom;
     static String List_img;
     String Liked_name;
+    String userid;
 
     ImageLoader img_loader;
 
@@ -122,6 +123,7 @@ public class activity_adapter extends ArrayAdapter<String> implements
         if (Activity.contentEquals("liked")) {
             String str_liked_by_name = imagess.get(position).get("Str_Likedby_name");
             Liked_name = str_liked_by_name;
+            userid=imagess.get(position).get("username");
             String first = " Liked your";
             String next = "<font color='#ffa500'>" + str_liked_by_name + "</font>";
             String next2 = "<font color='#ffa500'> Turn</font>";
@@ -132,6 +134,7 @@ public class activity_adapter extends ArrayAdapter<String> implements
         } else if (Activity.contentEquals("follow")) {
             String str_liked_by_name = imagess.get(position).get("Followername");
             Liked_name = str_liked_by_name;
+            userid=imagess.get(position).get("username");
             String first = "  Started Following you";
             String next = "<font color='#ffa500'>" + str_liked_by_name + "</font>";
             // String next2 = "<font color='#FFBF00'> Turn</font>";
@@ -145,6 +148,18 @@ public class activity_adapter extends ArrayAdapter<String> implements
 //                i1new.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 //                i1new.putExtra("User_detail", "@" + Liked_name);
 //                mAppContext.startActivity(i1new);
+                String str_id = imagess.get(position).get("postid");
+                String status_like = imagess.get(position).get("status_like");
+                String caption = imagess.get(position).get("caption");
+                List_img = imagess.get(position).get("url");
+                Intent lObjIntent = new Intent(mAppContext, Images_comment_screen.class);
+                lObjIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                lObjIntent.putExtra("images", List_img);
+                lObjIntent.putExtra("Post_id", str_id);
+                lObjIntent.putExtra("Check_follow", "GONE");
+                lObjIntent.putExtra("status_like", status_like);
+                lObjIntent.putExtra("caption", caption);
+                mAppContext.startActivity(lObjIntent);
             }
         });
         vh.Img_profilepic.setOnClickListener(new OnClickListener() {
@@ -152,7 +167,8 @@ public class activity_adapter extends ArrayAdapter<String> implements
             public void onClick(View v) {
                 Intent i1new = new Intent(mAppContext, Other_user_profile.class);
                 i1new.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                i1new.putExtra("User_detail", "@" + Liked_name);
+                i1new.putExtra("User_detail", "@" + userid);
+                i1new.putExtra("userid", userid);
                 mAppContext.startActivity(i1new);
             }
         });
